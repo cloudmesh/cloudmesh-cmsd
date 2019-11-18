@@ -61,7 +61,7 @@ class CmsdCommand():
         ::
 
           Usage:
-                cmsd setup
+                cmsd setup [--download]
                 cmsd clean
                 cmsd COMMAND
 
@@ -84,10 +84,13 @@ class CmsdCommand():
         VERBOSE(arguments)
 
         if arguments.setup:
-            print("option a")
+            if arguments["--download"]:
+                self.download_image()
+            else:
+                self.create_image()
 
         elif arguments.clean:
-            print("option b")
+            self.delete_image()
 
         elif arguments.COMMAND:
             self.run(arguments)
