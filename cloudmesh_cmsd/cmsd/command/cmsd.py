@@ -4,12 +4,9 @@ from cloudmesh.common.util import path_expand
 from pprint import pprint
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.dotdict import dotdict
-#
-#  DO NOT USE A CMD5 plugin, but just a regular python program
-#  use plain docopts here
-#
 import sys
-
+from docopt import docopt
+import textwrap
 
 class CmsdCommand():
 
@@ -59,13 +56,14 @@ class CmsdCommand():
         """
         raise NotImplementedError
 
-    @staticmethod
-    def do_cmsd(args):
+    def do_cmsd(self):
         """
         ::
 
           Usage:
-                cmsd COMMAND...
+                cmsd setup
+                cmsd clean
+                cmsd COMMAND
 
           This command passes the arguments to a docker container
           that runs cloudmesh.
@@ -75,21 +73,30 @@ class CmsdCommand():
 
 
         """
-        #arguments.FILE = arguments['--file'] or None
 
+        doc = textwrap.dedent(self.do_cmsd.__doc__)
+        args = docopt(doc, help=False)
         arguments = dotdict(args)
+
+        print("B", arguments)
+        print("A", args)
+
         VERBOSE(arguments)
 
-        if arguments.FILE:
+        if arguments.setup:
             print("option a")
 
-        elif arguments.list:
+        elif arguments.clean:
             print("option b")
 
-        Console.error("This is just a sample")
+        elif arguments.COMMAND:
+            self.run(arguments)
+
         return ""
 
+def main():
+    command = CmsdCommand()
+    command.do_cmsd()
 
 if __name__ == "__main__":
-    command = CmsdCommand()
-    command.do_cmsd(sys.argv)
+    main()
