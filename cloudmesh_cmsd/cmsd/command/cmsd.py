@@ -10,7 +10,54 @@ from cloudmesh.common.dotdict import dotdict
 #
 import sys
 
+
 class CmsdCommand():
+
+    def create_image(self):
+        """
+        reates image locally
+        :return:
+        """
+        raise NotImplementedError
+
+    def download_image(self):
+        """
+        downloads image from dockerhub
+        :return:
+        """
+        raise NotImplementedError
+
+    def delete_image(self):
+        """
+        deletes the cloudmesh image locally
+        :return:
+        """
+        raise NotImplementedError
+
+    def run(self, *args):
+        """
+        run the command via the docker container
+
+        :param args:
+        :return:
+        """
+        raise NotImplementedError
+
+    def setup(self, config_path="~/.cloudmesh/cmsd"):
+        """
+        this will copy the docker compose yaml and json file into the config_path
+        only if the files do not yet esixt
+        :param config_path:
+        :return:
+        """
+        raise NotImplementedError
+
+    def clean(self):
+        """
+        remove the ~/.cloudmesh/cmsd dir
+        :return:
+        """
+        raise NotImplementedError
 
     @staticmethod
     def do_cmsd(args):
