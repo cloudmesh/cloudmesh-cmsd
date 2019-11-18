@@ -78,10 +78,8 @@ class CmsdCommand():
         args = docopt(doc, help=False)
         arguments = dotdict(args)
 
-        print("B", arguments)
-        print("A", args)
-
-        VERBOSE(arguments)
+        #print("B", arguments)
+        #print("A", args)
 
         if arguments.setup:
             if arguments["--download"]:
