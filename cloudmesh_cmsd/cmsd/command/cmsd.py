@@ -1,12 +1,25 @@
 from __future__ import print_function
 from cloudmesh.common.console import Console
 from cloudmesh.common.util import path_expand
+from cloudmesh.common.util import writefile
 from pprint import pprint
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.dotdict import dotdict
 import sys
 from docopt import docopt
 import textwrap
+
+docercompose = """
+PUT THE COMPOSE HERE
+"""
+
+entry = """
+PUT THAT JSON HERE
+"""
+
+# you can use writefile(filename, entry) to for example write a file. make
+# sure to use path_expand and than create a dir. you can resuse commands form
+# cloudmesh.common, but no other class
 
 class CmsdCommand():
 
