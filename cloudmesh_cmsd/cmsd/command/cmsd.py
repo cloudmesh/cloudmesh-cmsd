@@ -1,4 +1,7 @@
 from __future__ import print_function
+
+import os
+
 from cloudmesh.common.console import Console
 from cloudmesh.common.util import path_expand
 from pprint import pprint
@@ -18,21 +21,21 @@ class CmsdCommand():
         reates image locally
         :return:
         """
-        raise NotImplementedError
+        os.system('docker-compose build')
 
     def download_image(self):
         """
         downloads image from dockerhub
         :return:
         """
-        raise NotImplementedError
+        os.system('docker-compose pull mongo')
 
     def delete_image(self):
         """
         deletes the cloudmesh image locally
         :return:
         """
-        raise NotImplementedError
+        os.system('docker-compose rm')
 
     def run(self, *args):
         """
@@ -41,7 +44,7 @@ class CmsdCommand():
         :param args:
         :return:
         """
-        raise NotImplementedError
+        os.system('docker-compose up')
 
     def setup(self, config_path="~/.cloudmesh/cmsd"):
         """
@@ -50,14 +53,14 @@ class CmsdCommand():
         :param config_path:
         :return:
         """
-        raise NotImplementedError
+        print(os.path.exists('docker-compose.yml'))
 
     def clean(self):
         """
         remove the ~/.cloudmesh/cmsd dir
         :return:
         """
-        raise NotImplementedError
+        os.removedirs('~/.cloudmesh/cmsd')
 
     @staticmethod
     def do_cmsd(args):
@@ -87,6 +90,7 @@ class CmsdCommand():
             print("option b")
 
         Console.error("This is just a sample")
+        os.system('docker-compose start')
         return ""
 
 
