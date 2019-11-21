@@ -63,7 +63,9 @@ class CmsdCommand():
         :param config_path:
         :return:
         """
-        print(os.path.exists('docker-compose.yml'))
+        if not os.path.exists('docker-compose.yml'):
+            from shutil import copyfile
+            copyfile(config_path + '/docker-compose.yml', '.')
 
     def clean(self):
         """
