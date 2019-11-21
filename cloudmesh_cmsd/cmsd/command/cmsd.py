@@ -4,15 +4,25 @@ import os
 
 from cloudmesh.common.console import Console
 from cloudmesh.common.util import path_expand
+from cloudmesh.common.util import writefile
 from pprint import pprint
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.dotdict import dotdict
-#
-#  DO NOT USE A CMD5 plugin, but just a regular python program
-#  use plain docopts here
-#
 import sys
+from docopt import docopt
+import textwrap
 
+docercompose = """
+PUT THE COMPOSE HERE
+"""
+
+entry = """
+PUT THAT JSON HERE
+"""
+
+# you can use writefile(filename, entry) to for example write a file. make
+# sure to use path_expand and than create a dir. you can resuse commands form
+# cloudmesh.common, but no other class
 
 class CmsdCommand():
 
@@ -62,13 +72,14 @@ class CmsdCommand():
         """
         os.removedirs('~/.cloudmesh/cmsd')
 
-    @staticmethod
-    def do_cmsd(args):
+    def do_cmsd(self):
         """
         ::
 
           Usage:
-                cmsd COMMAND...
+                cmsd setup [--download]
+                cmsd clean
+                cmsd COMMAND
 
           This command passes the arguments to a docker container
           that runs cloudmesh.
@@ -78,22 +89,32 @@ class CmsdCommand():
 
 
         """
-        #arguments.FILE = arguments['--file'] or None
 
+        doc = textwrap.dedent(self.do_cmsd.__doc__)
+        args = docopt(doc, help=False)
         arguments = dotdict(args)
-        VERBOSE(arguments)
 
-        if arguments.FILE:
-            print("option a")
+        #print("B", arguments)
+        #print("A", args)
 
-        elif arguments.list:
-            print("option b")
+        if arguments.setup:
+            if arguments["--download"]:
+                self.download_image()
+            else:
+                self.create_image()
 
-        Console.error("This is just a sample")
+        elif arguments.clean:
+            self.delete_image()
+
+        elif arguments.COMMAND:
+            self.run(arguments)
+
         os.system('docker-compose start')
         return ""
 
+def main():
+    command = CmsdCommand()
+    command.do_cmsd()
 
 if __name__ == "__main__":
-    command = CmsdCommand()
-    command.do_cmsd(sys.argv)
+    main()

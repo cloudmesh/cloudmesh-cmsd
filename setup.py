@@ -78,7 +78,7 @@ setup(
     # namespace_packages=['cloudmesh'],
     entry_points={
         'console_scripts': [
-            'cms = cloudmesh_cmsd.cmsd.command.cmsd:main',
+            'cmsd = cloudmesh_cmsd.cmsd.command.cmsd:main',
         ],
     }
 )
