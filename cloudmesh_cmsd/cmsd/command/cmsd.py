@@ -221,6 +221,9 @@ class CmsdCommand():
             raise NotImplementedError
 
         elif arguments["COMMAND"]:
+
+            # check if configured, if not do it
+
             self.run(arguments)
 
         else:
