@@ -214,11 +214,18 @@ class CmsdCommand():
         elif arguments["clean"]:
             self.delete_image()
 
+        elif arguments["version"]:
+            raise NotImplementedError
+
+        elif arguments["update"]:
+            raise NotImplementedError
+
         elif arguments["COMMAND"]:
             self.run(arguments)
 
         else:
             self.run()
+
         return ""
 
 def main():
