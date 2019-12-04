@@ -1,5 +1,11 @@
 from __future__ import print_function
 
+
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
+
 import os
 import textwrap
 
