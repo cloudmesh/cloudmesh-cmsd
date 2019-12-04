@@ -1,24 +1,82 @@
 from __future__ import print_function
 
 import os
-
-from cloudmesh.common.console import Console
-from cloudmesh.common.util import path_expand
-from cloudmesh.common.util import writefile
-from pprint import pprint
-from cloudmesh.common.debug import VERBOSE
-from cloudmesh.common.dotdict import dotdict
-import sys
-from docopt import docopt
 import textwrap
 
-docercompose = """
-PUT THE COMPOSE HERE
+from cloudmesh.common.dotdict import dotdict
+from cloudmesh.common.util import writefile
+from cloudmesh.configuration.Config import Config
+from docopt import docopt
+
+dockercompose = """
+version: '3'
+services:
+  cloudmesh:
+    build: .
+    volumes:
+      - .:/code
+      - ~/.cloudmesh:/root/.cloudmesh
+      - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub
+    depends_on:
+      - mongo
+    links:
+      - mongo
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: <your-username>
+      MONGO_INITDB_ROOT_PASSWORD: <your-password>
+      MONGO_INITDB_DATABASE: cloudmesh
+    ports:
+      - "27017-27019:27017-27019"
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+"""
+
+dockerfile = """
+FROM ubuntu:19.04
+
+RUN set -x \
+        && apt-get -y update \
+        && apt-get -y upgrade \
+        && apt-get -y --no-install-recommends install build-essential \
+                                                      git \
+                                                      curl \
+                                                      wget \
+                                                      sudo \
+        && apt-get -y install python3 \
+                              python3-pip \
+        && rm -rf /var/lib/apt/lists/* \
+        && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
+        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 \
+        && pip install cloudmesh-installer
+
+RUN mkdir cm
+WORKDIR cm
+
+RUN cloudmesh-installer git clone cloud
+RUN cloudmesh-installer install cloud -e
+
+CMD exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"
 """
 
 entry = """
-PUT THAT JSON HERE
+db.createUser(
+    {
+        user: "<your-username>",
+        pwd: "<your-password>",
+        roles: [
+            {
+                role: "readWrite",
+                db: "cloudmesh"
+            }
+        ]
+    }
+);
 """
+
 
 # you can use writefile(filename, entry) to for example write a file. make
 # sure to use path_expand and than create a dir. you can resuse commands form
@@ -26,26 +84,31 @@ PUT THAT JSON HERE
 
 class CmsdCommand():
 
+    def __init__(self):
+        self.config_path = "~/.cloudmesh/cmsd"
+        self.username = ''
+        self.password = ''
+
     def create_image(self):
         """
         reates image locally
         :return:
         """
-        os.system('docker-compose build')
+        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml build')
 
     def download_image(self):
         """
         downloads image from dockerhub
         :return:
         """
-        os.system('docker-compose pull mongo')
+        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml pull mongo')
 
     def delete_image(self):
         """
         deletes the cloudmesh image locally
         :return:
         """
-        os.system('docker-compose rm')
+        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
 
     def run(self, *args):
         """
@@ -54,7 +117,7 @@ class CmsdCommand():
         :param args:
         :return:
         """
-        os.system('docker-compose up')
+        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml up')
 
     def setup(self, config_path="~/.cloudmesh/cmsd"):
         """
@@ -63,9 +126,23 @@ class CmsdCommand():
         :param config_path:
         :return:
         """
-        if not os.path.exists('docker-compose.yml'):
-            from shutil import copyfile
-            copyfile(config_path + '/docker-compose.yml', '.')
+        self.config_path = os.path.expanduser(config_path)
+        self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
+        self.password = Config()["cloudmesh"]["data"]["mongo"]["MONGO_PASSWORD"]
+        if not os.path.exists(self.config_path):
+            print(self.config_path)
+            os.makedirs(self.config_path)
+
+        if not os.path.exists(self.config_path + '/Dockerfile'):
+            writefile(self.config_path + '/Dockerfile', dockerfile)
+
+        if not os.path.exists(self.config_path + '/docker-compose.yml'):
+            dc = dockercompose.replace("<your-username>", self.username).replace("<your-password>", self.password)
+            writefile(self.config_path + '/docker-compose.yml', dc)
+
+        if not os.path.exists(self.config_path + '/mongo-init.js'):
+            et = entry.replace("<your-username>", self.username).replace("<your-password>", self.password)
+            writefile(self.config_path + '/mongo-init.js', et)
 
     def clean(self):
         """
@@ -96,10 +173,12 @@ class CmsdCommand():
         args = docopt(doc, help=False)
         arguments = dotdict(args)
 
-        #print("B", arguments)
-        #print("A", args)
+        # print("B", arguments)
+        # print("A", args)
 
         if arguments.setup:
+            self.setup()
+            os.system(' '.join(['ls -l', self.config_path]))
             if arguments["--download"]:
                 self.download_image()
             else:
@@ -111,7 +190,8 @@ class CmsdCommand():
         elif arguments.COMMAND:
             self.run(arguments)
 
-        os.system('docker-compose start')
+        else:
+            self.run()
         return ""
 
 def main():
