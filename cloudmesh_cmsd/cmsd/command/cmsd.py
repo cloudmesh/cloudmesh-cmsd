@@ -159,7 +159,6 @@ class CmsdCommand():
                 cmsd setup [--download]
                 cmsd clean
                 cmsd COMMAND
-                cmsd set USERNAME PASSWORD
 
           This command passes the arguments to a docker container
           that runs cloudmesh.
