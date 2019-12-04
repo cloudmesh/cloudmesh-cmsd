@@ -9,7 +9,6 @@ except:
 import os
 import textwrap
 
-from cloudmesh.common.dotdict import dotdict
 from cloudmesh.common.util import writefile
 from cloudmesh.configuration.Config import Config
 from docopt import docopt
@@ -176,13 +175,9 @@ class CmsdCommand():
         """
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
-        args = docopt(doc, help=False)
-        arguments = dotdict(args)
+        arguments = docopt(doc, help=False)
 
-        # print("B", arguments)
-        # print("A", args)
-
-        if arguments.setup:
+        if arguments["setup"]:
             self.setup()
             os.system(' '.join(['ls -l', self.config_path]))
             if arguments["--download"]:
@@ -190,10 +185,10 @@ class CmsdCommand():
             else:
                 self.create_image()
 
-        elif arguments.clean:
+        elif arguments["clean"]:
             self.delete_image()
 
-        elif arguments.COMMAND:
+        elif arguments["COMMAND"]:
             self.run(arguments)
 
         else:
