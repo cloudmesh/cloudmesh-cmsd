@@ -163,13 +163,39 @@ class CmsdCommand():
           Usage:
                 cmsd setup [--download]
                 cmsd clean
+                cmsd version
+                cmsd update
                 cmsd COMMAND
+
 
           This command passes the arguments to a docker container
           that runs cloudmesh.
 
           Arguments:
               COMMAND the commands we bass along
+
+          Description:
+
+            cmsd setup [--download]
+
+                TBD
+
+            cmsd clean
+
+                TBD
+
+            cmsd version
+
+                TBD
+
+            cmsd update
+
+                TBD
+
+            cmsd COMMAND
+
+                The command will be executed within the container, just as in
+                case of cms.
 
 
         """
