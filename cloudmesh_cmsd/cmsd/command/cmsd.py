@@ -1,12 +1,7 @@
 from __future__ import print_function
 
-
-try:
-    from pathlib import Path
-except:
-    from pathlib2 import Path
-
 import os
+import shutil
 import textwrap
 
 from cloudmesh.common.util import writefile
@@ -90,7 +85,7 @@ db.createUser(
 class CmsdCommand():
 
     def __init__(self):
-        self.config_path = "~/.cloudmesh/cmsd"
+        self.config_path = os.path.expanduser("~/.cloudmesh/cmsd")
         self.username = ''
         self.password = ''
 
@@ -113,7 +108,8 @@ class CmsdCommand():
         deletes the cloudmesh image locally
         :return:
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
+        if os.path.exists(f'{self.config_path}/docker-compose.yml'):
+            os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
 
     def run(self, *args):
         """
@@ -154,7 +150,10 @@ class CmsdCommand():
         remove the ~/.cloudmesh/cmsd dir
         :return:
         """
-        os.removedirs('~/.cloudmesh/cmsd')
+        print(self.config_path)
+        if os.path.exists(self.config_path):
+            shutil.rmtree(self.config_path)
+            print('deleted')
 
     def do_cmsd(self):
         """
@@ -165,7 +164,8 @@ class CmsdCommand():
                 cmsd clean
                 cmsd version
                 cmsd update
-                cmsd COMMAND
+                cmsd help
+                cmsd run
 
 
           This command passes the arguments to a docker container
@@ -192,10 +192,10 @@ class CmsdCommand():
 
                 TBD
 
-            cmsd COMMAND
+            cmsd help
 
-                The command will be executed within the container, just as in
-                case of cms.
+
+            cmsd run
 
 
         """
@@ -213,27 +213,32 @@ class CmsdCommand():
 
         elif arguments["clean"]:
             self.delete_image()
+            self.clean()
 
-        elif arguments["version"]:
-            raise NotImplementedError
+        elif arguments['help']:
+            print(doc)
 
-        elif arguments["update"]:
-            raise NotImplementedError
+        elif arguments['version']:
+            os.system(f'cat {os.path.dirname(os.path.abspath(__file__))}/../__version__.py')
 
-        elif arguments["COMMAND"]:
+        elif arguments['update']:
+            self.delete_image()
+            self.clean()
+            self.setup()
 
-            # check if configured, if not do it
-
+        elif arguments['run']:
+            self.setup()
             self.run(arguments)
 
         else:
-            self.run()
-
+            print(doc)
         return ""
+
 
 def main():
     command = CmsdCommand()
     command.do_cmsd()
+
 
 if __name__ == "__main__":
     main()
