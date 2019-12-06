@@ -39,12 +39,16 @@ The source code is contained in
 
 ## Bugs
 
-Despite the TA reporting it works, we could not install it we get the error.
+Despite the TA reporting it works, we could not install it we get the
+error.
 
 cmsd help
 ERROR: .FileNotFoundError: [Errno 2] No such file or directory: '/Users/grey/.cloudmesh/cmsd/docker-compose.yml'
 
-Clearly the yml file need to be deployed if it can not be found. 
+Clearly the yml file need to be deployed if it can not be found. Users
+must not have to install anything! This all needs to be part of the
+script.
 
-If you encounter this error. please send a mail to the instructors in piazza that you need this tool.
+If you encounter this error. please send a mail to the instructors in
+piazza that you need this tool.
 
