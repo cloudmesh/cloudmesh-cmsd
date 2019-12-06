@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import shutil
 import textwrap
 
 from cloudmesh.common.dotdict import dotdict
@@ -85,7 +86,7 @@ db.createUser(
 class CmsdCommand():
 
     def __init__(self):
-        self.config_path = "~/.cloudmesh/cmsd"
+        self.config_path = os.path.expanduser("~/.cloudmesh/cmsd")
         self.username = ''
         self.password = ''
 
@@ -149,7 +150,10 @@ class CmsdCommand():
         remove the ~/.cloudmesh/cmsd dir
         :return:
         """
-        os.removedirs('~/.cloudmesh/cmsd')
+        print(self.config_path)
+        if os.path.exists(self.config_path):
+            shutil.rmtree(self.config_path)
+            print('deleted')
 
     def do_cmsd(self):
         """
@@ -186,17 +190,23 @@ class CmsdCommand():
 
         elif arguments.clean:
             self.delete_image()
+            self.clean()
 
-        elif arguments.COMMAND:
+        elif arguments.COMMAND == 'help':
+            print(doc)
+
+        elif arguments.COMMAND == 'run':
             self.run(arguments)
 
         else:
-            self.run()
+            print(doc)
         return ""
+
 
 def main():
     command = CmsdCommand()
     command.do_cmsd()
+
 
 if __name__ == "__main__":
     main()
