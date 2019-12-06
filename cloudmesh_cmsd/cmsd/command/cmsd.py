@@ -1,10 +1,15 @@
 from __future__ import print_function
 
+
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
+
 import os
 import shutil
 import textwrap
 
-from cloudmesh.common.dotdict import dotdict
 from cloudmesh.common.util import writefile
 from cloudmesh.configuration.Config import Config
 from docopt import docopt
@@ -162,7 +167,10 @@ class CmsdCommand():
           Usage:
                 cmsd setup [--download]
                 cmsd clean
+                cmsd version
+                cmsd update
                 cmsd COMMAND
+
 
           This command passes the arguments to a docker container
           that runs cloudmesh.
@@ -170,17 +178,36 @@ class CmsdCommand():
           Arguments:
               COMMAND the commands we bass along
 
+          Description:
+
+            cmsd setup [--download]
+
+                TBD
+
+            cmsd clean
+
+                TBD
+
+            cmsd version
+
+                TBD
+
+            cmsd update
+
+                TBD
+
+            cmsd COMMAND
+
+                The command will be executed within the container, just as in
+                case of cms.
+
 
         """
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
-        args = docopt(doc, help=False)
-        arguments = dotdict(args)
+        arguments = docopt(doc, help=False)
 
-        # print("B", arguments)
-        # print("A", args)
-
-        if arguments.setup:
+        if arguments["setup"]:
             self.setup()
             os.system(' '.join(['ls -l', self.config_path]))
             if arguments["--download"]:
@@ -188,7 +215,7 @@ class CmsdCommand():
             else:
                 self.create_image()
 
-        elif arguments.clean:
+        elif arguments["clean"]:
             self.delete_image()
             self.clean()
 
