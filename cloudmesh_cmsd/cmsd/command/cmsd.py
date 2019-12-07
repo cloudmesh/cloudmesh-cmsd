@@ -158,7 +158,7 @@ class CmsdCommand():
         """
         starts up the containers for cms
         """
-        self.docker_compose('up')
+        self.docker_compose('up -d')
 
     def ps(self):
         """
@@ -225,9 +225,9 @@ class CmsdCommand():
                 cmsd --version
                 cmsd --update
                 cmsd --image
-                cmsd --up
-                cmsd --ps
+                cmsd --start
                 cmsd --stop
+                cmsd --ps
                 cmsd COMMAND
                 cmsd
 
@@ -319,7 +319,7 @@ class CmsdCommand():
         elif arguments["--stop"]:
             self.stop()
 
-        elif arguments["--up"]:
+        elif arguments["--start"]:
             self.up()
 
         elif arguments["--ps"]:
