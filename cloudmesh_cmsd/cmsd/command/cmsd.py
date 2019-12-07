@@ -107,7 +107,9 @@ class CmsdCommand():
         os.system(self.compose + command)
 
     def update(self):
-        raise NotImplementedError
+        self.delete_image()
+        self.clean()
+        self.setup()
 
     def create_image(self):
         """
@@ -164,7 +166,7 @@ class CmsdCommand():
 
         d = Path(self.config_path)
         if not d.exists():
-            print("creating {self.config_path}")
+            print("creating",  self.config_path)
             Path(self.config_path).mkdir(parents=True, exist_ok=True)
 
         self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
@@ -192,7 +194,7 @@ class CmsdCommand():
         print(self.config_path)
         if os.path.exists(self.config_path):
             shutil.rmtree(self.config_path)
-            print('deleted')
+            print('deleting', self.config_path)
 
     def do_cmsd(self):
         """
