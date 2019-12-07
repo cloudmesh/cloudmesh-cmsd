@@ -59,6 +59,8 @@ RUN set -x \
                                                       curl \
                                                       wget \
                                                       sudo \
+                                                      mongodb \
+                                                      net-tools \
         && apt-get -y install python3 \
                               python3-pip \
         && rm -rf /var/lib/apt/lists/* \
