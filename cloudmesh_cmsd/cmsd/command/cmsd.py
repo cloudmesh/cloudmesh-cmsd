@@ -17,6 +17,7 @@ import textwrap
 from cloudmesh.common.util import writefile
 from cloudmesh.configuration.Config import Config
 from docopt import docopt
+import sys
 
 dockercompose = """
 version: '3'
@@ -176,11 +177,12 @@ class CmsdCommand():
         ::
 
           Usage:
-                cmsd setup [--download]
-                cmsd clean
-                cmsd version
-                cmsd update
                 cmsd --help
+                cmsd --setup [--download]
+                cmsd --clean
+                cmsd --version
+                cmsd --update
+                cmsd --image
                 cmsd COMMAND
 
 
@@ -196,22 +198,26 @@ class CmsdCommand():
 
                 prints this manual page
 
-            cmsd setup [--download]
+            cmsd --image
+
+                list the container
+
+            cmsd --setup [--download]
 
                 downloads the source distribution, installes the image loaclly
 
                 [--download is not yet supported, and will be implemented when the
                 source setup works]
 
-            cmsd clean
+            cmsd --clean
 
                 removes the container form docker
 
-            cmsd version
+            cmsd --version
 
                 prints out the verison of cmsd and the version of the container
 
-            cmsd update
+            cmsd --update
 
                 gets a new container form dockerhub
 
@@ -226,7 +232,7 @@ class CmsdCommand():
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
 
-        if arguments["setup"]:
+        if arguments["--setup"]:
             self.setup()
             os.system(' '.join(['ls -l', self.config_path]))
             if arguments["--download"]:
@@ -234,7 +240,7 @@ class CmsdCommand():
             else:
                 self.create_image()
 
-        elif arguments["version"]:
+        elif arguments["--version"]:
             print ("cmsd:", version)
 
             container_version = "not yet implemented"
@@ -242,12 +248,21 @@ class CmsdCommand():
             print ()
             raise NotImplementedError
 
-        elif arguments["clean"]:
+        elif arguments["--clean"]:
             self.delete_image()
             self.clean()
 
         elif arguments['--help']:
             print(doc)
+
+        elif arguments['--image']:
+            #
+            # BUG does not work on windows. fix
+            #
+            if sys.platform == 'win32':
+                raise NotImplementedError
+            print("REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
+            os.system("docker images | fgrep cmsd_cloudmesh")
 
         elif arguments["COMMAND"]:
             command = arguments["COMMAND"]
