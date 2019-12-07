@@ -139,11 +139,10 @@ class CmsdCommand():
 
         self.config_path = os.path.expanduser(config_path)
 
-        file = Path(self.config_path)
-        if not file.exists():
-            print("yaml file not set up")
-            raise NotImplementedError
-
+        d = Path(self.config_path)
+        if not d.exists():
+            print("creating {self.config_path}")
+            Path(self.config_path).mkdir(parents=True, exist_ok=True)
 
         self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
         self.password = Config()["cloudmesh"]["data"]["mongo"]["MONGO_PASSWORD"]
