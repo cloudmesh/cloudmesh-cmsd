@@ -166,6 +166,11 @@ class CmsdCommand():
         """
         self.docker_compose('ps')
 
+    def stop(self):
+        """
+        docker-compose stop
+        """
+        self.docker_compose('stop')
 
     def setup(self, config_path="~/.cloudmesh/cmsd"):
         """
@@ -222,6 +227,7 @@ class CmsdCommand():
                 cmsd --image
                 cmsd --up
                 cmsd --ps
+                cmsd --stop
                 cmsd COMMAND
                 cmsd
 
@@ -310,6 +316,8 @@ class CmsdCommand():
             print("REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
             os.system("docker images | fgrep cmsd_cloudmesh")
 
+        elif arguments["--stop"]:
+            self.stop()
 
         elif arguments["--up"]:
             self.up()
