@@ -1,5 +1,11 @@
 from __future__ import print_function
 
+
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
+
 import os
 import shutil
 import textwrap
@@ -108,8 +114,7 @@ class CmsdCommand():
         deletes the cloudmesh image locally
         :return:
         """
-        if os.path.exists(f'{self.config_path}/docker-compose.yml'):
-            os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
+        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
 
     def run(self, *args):
         """
@@ -164,8 +169,7 @@ class CmsdCommand():
                 cmsd clean
                 cmsd version
                 cmsd update
-                cmsd help
-                cmsd run
+                cmsd COMMAND
 
 
           This command passes the arguments to a docker container
@@ -192,10 +196,10 @@ class CmsdCommand():
 
                 TBD
 
-            cmsd help
+            cmsd COMMAND
 
-
-            cmsd run
+                The command will be executed within the container, just as in
+                case of cms.
 
 
         """
@@ -211,24 +215,19 @@ class CmsdCommand():
             else:
                 self.create_image()
 
+        elif arguments["version"]:
+            raise NotImplementedError
+
         elif arguments["clean"]:
             self.delete_image()
             self.clean()
 
-        elif arguments['help']:
+        elif arguments.COMMAND == 'help':
             print(doc)
 
-        elif arguments['version']:
-            os.system(f'cat {os.path.dirname(os.path.abspath(__file__))}/../__version__.py')
-
-        elif arguments['update']:
-            self.delete_image()
-            self.clean()
-            self.setup()
-
-        elif arguments['run']:
-            self.setup()
-            self.run(arguments)
+        elif arguments.COMMAND:
+            print(" {COMMAND} this will be run in container ... ")
+            raise NotImplementedError
 
         else:
             print(doc)
