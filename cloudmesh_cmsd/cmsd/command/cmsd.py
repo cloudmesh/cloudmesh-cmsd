@@ -287,7 +287,7 @@ class CmsdCommand():
 
         elif arguments["COMMAND"]:
             command = arguments["COMMAND"]
-            self.run(command)
+            self.cms(command)
 
         elif arguments["COMMAND"] is None:
 
