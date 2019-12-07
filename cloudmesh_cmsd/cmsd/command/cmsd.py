@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 from cloudmesh_cmsd.cmsd.__version__ import version
+from pprint import pprint
 
 try:
     from pathlib import Path
@@ -190,6 +191,7 @@ class CmsdCommand():
                 cmsd --update
                 cmsd --image
                 cmsd COMMAND
+                cmsd
 
 
           This command passes the arguments to a docker container
@@ -232,11 +234,17 @@ class CmsdCommand():
                 The command will be executed within the container, just as in
                 case of cms.
 
+            cmsd
+
+                When no command is specified cms will be run in interactive
+                mode.
+
 
         """
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
+        pprint(arguments)
 
         if arguments["--setup"]:
             self.setup()
@@ -274,8 +282,15 @@ class CmsdCommand():
             command = arguments["COMMAND"]
             self.run(command)
 
+        elif arguments["COMMAND"] is None:
+
+            print("start cms interactively")
+            raise NotImplementedError
+
         else:
+
             print(doc)
+
         return ""
 
 
