@@ -1,3 +1,7 @@
+#
+# This command is python2 and 3 compatible
+#
+
 from __future__ import print_function
 
 
@@ -169,6 +173,7 @@ class CmsdCommand():
                 cmsd clean
                 cmsd version
                 cmsd update
+                cmsd --help
                 cmsd COMMAND
 
 
@@ -179,6 +184,10 @@ class CmsdCommand():
               COMMAND the commands we bass along
 
           Description:
+
+            cmsd --help
+
+                prints this manual page
 
             cmsd setup [--download]
 
@@ -225,11 +234,12 @@ class CmsdCommand():
             self.delete_image()
             self.clean()
 
-        elif arguments.COMMAND == 'help':
+        elif arguments['--help']:
             print(doc)
 
-        elif arguments.COMMAND:
-            print(" {COMMAND} this will be run in container ... ")
+        elif arguments["COMMAND"]:
+            command = arguments["COMMAND"]
+            print(command + " this will be run in container ... ")
             raise NotImplementedError
 
         else:
