@@ -122,14 +122,21 @@ class CmsdCommand():
         """
         os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
 
-    def run(self, command):
+    def run(self, command=""):
         """
         run the command via the docker container
 
         :param command: the cms command to be run in the container
         """
-        raise NotImplementedError
+        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml run ' + command)
 
+    def cms(self, command=""):
+        """
+        run the command via the docker container
+
+        :param command: the cms command to be run in the container
+        """
+        self.run("cloudmesh cms " + command)
 
     def up(self):
         """
@@ -285,7 +292,9 @@ class CmsdCommand():
         elif arguments["COMMAND"] is None:
 
             print("start cms interactively")
-            raise NotImplementedError
+            self.cms("ls")
+
+            # raise NotImplementedError
 
         else:
 
