@@ -121,12 +121,18 @@ class CmsdCommand():
         """
         os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
 
-    def run(self, *args):
+    def run(self, command):
         """
         run the command via the docker container
 
-        :param args:
-        :return:
+        :param command: the cms command to be run in the container
+        """
+        raise NotImplementedError
+
+
+    def up(self):
+        """
+        starts up the containers for cms
         """
         os.system(f'docker-compose -f {self.config_path}/docker-compose.yml up')
 
@@ -266,8 +272,7 @@ class CmsdCommand():
 
         elif arguments["COMMAND"]:
             command = arguments["COMMAND"]
-            print(command + " this will be run in container ... ")
-            raise NotImplementedError
+            self.run(command)
 
         else:
             print(doc)
