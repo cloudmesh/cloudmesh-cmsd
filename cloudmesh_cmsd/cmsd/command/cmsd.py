@@ -182,19 +182,22 @@ class CmsdCommand():
 
             cmsd setup [--download]
 
-                TBD
+                downloads the source distribution, installes the image loaclly
+
+                [--download is not yet supported, and will be implemented when the
+                source setup works]
 
             cmsd clean
 
-                TBD
+                removes the container form docker
 
             cmsd version
 
-                TBD
+                prints out the verison of cmsd and the version of the container
 
             cmsd update
 
-                TBD
+                gets a new container form dockerhub
 
             cmsd COMMAND
 
