@@ -107,15 +107,17 @@ class CmsdCommand():
         os.system(self.compose + command)
 
     def update(self):
+        self.docker_compose("down")
+
         self.delete_image()
-        self.clean()
         try:
             os.system("docker rmi cmsd_cloudmesh")
         except:
             pass
+        self.clean()
+        self.setup()
         self.up()
         self.create_image()
-        self.setup()
 
     def create_image(self):
         """
@@ -282,7 +284,7 @@ class CmsdCommand():
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
-        pprint(arguments)
+        #pprint(arguments)
 
         if arguments["--setup"]:
             self.setup()
@@ -335,9 +337,8 @@ class CmsdCommand():
         elif arguments["COMMAND"] is None:
 
             print("start cms interactively")
-            self.cms("ls")
-
-            # raise NotImplementedError
+            os.system("docker exec -ti cmsd /bin/bash")
+            #self.docker_compose("exec cmsd /bin/bash")
 
         else:
 
