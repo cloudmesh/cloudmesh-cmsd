@@ -109,6 +109,12 @@ class CmsdCommand():
     def update(self):
         self.delete_image()
         self.clean()
+        try:
+            os.system("docker rmi cmsd_cloudmesh")
+        except:
+            pass
+        self.up()
+        self.create_image()
         self.setup()
 
     def create_image(self):
@@ -153,6 +159,13 @@ class CmsdCommand():
         starts up the containers for cms
         """
         self.docker_compose('up')
+
+    def ps(self):
+        """
+        docker-compose ps
+        """
+        self.docker_compose('ps')
+
 
     def setup(self, config_path="~/.cloudmesh/cmsd"):
         """
@@ -208,6 +221,7 @@ class CmsdCommand():
                 cmsd --update
                 cmsd --image
                 cmsd --up
+                cmsd --ps
                 cmsd COMMAND
                 cmsd
 
@@ -299,6 +313,9 @@ class CmsdCommand():
 
         elif arguments["--up"]:
             self.up()
+
+        elif arguments["--ps"]:
+            self.ps()
 
         elif arguments["--update"]:
             self.update()
