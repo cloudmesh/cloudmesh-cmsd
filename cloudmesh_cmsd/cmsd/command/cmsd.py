@@ -24,6 +24,7 @@ dockercompose = """
 version: '3'
 services:
   cloudmesh:
+    container_name: cmsd
     build: .
     volumes:
       - .:/code
@@ -98,29 +99,36 @@ class CmsdCommand():
 
     def __init__(self):
         self.config_path = os.path.expanduser("~/.cloudmesh/cmsd")
+        self.compose = "docker-compose -f " + self.config_path + "/docker-compose.yml "
         self.username = ''
         self.password = ''
+
+    def docker_compose(self, command):
+        os.system(self.compose + command)
+
+    def update(self):
+        raise NotImplementedError
 
     def create_image(self):
         """
         reates image locally
         :return:
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml build')
+        self.docker_compose('build')
 
     def download_image(self):
         """
         downloads image from dockerhub
         :return:
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml pull mongo')
+        self.docker_compose('pull mongo')
 
     def delete_image(self):
         """
         deletes the cloudmesh image locally
         :return:
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
+        self.docker_compose('rm')
 
     def run(self, command=""):
         """
@@ -128,7 +136,7 @@ class CmsdCommand():
 
         :param command: the cms command to be run in the container
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml run ' + command)
+        self.docker_compose('run ' + command)
 
     def cms(self, command=""):
         """
@@ -142,7 +150,7 @@ class CmsdCommand():
         """
         starts up the containers for cms
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml up')
+        self.docker_compose('up')
 
     def setup(self, config_path="~/.cloudmesh/cmsd"):
         """
@@ -197,6 +205,7 @@ class CmsdCommand():
                 cmsd --version
                 cmsd --update
                 cmsd --image
+                cmsd --up
                 cmsd COMMAND
                 cmsd
 
@@ -284,6 +293,13 @@ class CmsdCommand():
                 raise NotImplementedError
             print("REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
             os.system("docker images | fgrep cmsd_cloudmesh")
+
+
+        elif arguments["--up"]:
+            self.up()
+
+        elif arguments["--update"]:
+            self.update()
 
         elif arguments["COMMAND"]:
             command = arguments["COMMAND"]
