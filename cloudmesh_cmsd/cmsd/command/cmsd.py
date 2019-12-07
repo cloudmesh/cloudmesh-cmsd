@@ -3,7 +3,7 @@
 #
 
 from __future__ import print_function
-
+from cloudmesh_cmsd.cmsd.__version__ import version
 
 try:
     from pathlib import Path
@@ -228,6 +228,11 @@ class CmsdCommand():
                 self.create_image()
 
         elif arguments["version"]:
+            print ("cmsd:", version)
+
+            container_version = "not yet implemented"
+            print("container:", container_version)
+            print ()
             raise NotImplementedError
 
         elif arguments["clean"]:
