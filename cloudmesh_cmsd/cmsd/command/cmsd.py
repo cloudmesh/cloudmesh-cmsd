@@ -136,7 +136,15 @@ class CmsdCommand():
         :param config_path:
         :return:
         """
+
         self.config_path = os.path.expanduser(config_path)
+
+        file = Path(self.config_path)
+        if not file.exists():
+            print("yaml file not set up")
+            raise NotImplementedError
+
+
         self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
         self.password = Config()["cloudmesh"]["data"]["mongo"]["MONGO_PASSWORD"]
         if not os.path.exists(self.config_path):
