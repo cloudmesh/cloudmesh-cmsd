@@ -247,6 +247,141 @@ class CmsdCommand():
             print(doc)
         return ""
 
+   def do_cmsd_proper(self):
+        """
+        ::
+
+          Usage:
+                cmsd --help
+                cmsd --setup [--download]
+                cmsd --clean
+                cmsd --version
+                cmsd --update
+                cmsd --image
+                cmsd --start
+                cmsd --stop
+                cmsd --ps
+                cmsd --shell
+                cmsd COMMAND...
+                cmsd
+
+
+          This command passes the arguments to a docker container
+          that runs cloudmesh.
+
+          Arguments:
+              COMMAND the commands we bass along
+
+          Description:
+
+            cmsd --help
+
+                prints this manual page
+
+            cmsd --image
+
+                list the container
+
+            cmsd --setup [--download]
+
+                downloads the source distribution, installes the image loaclly
+
+                [--download is not yet supported, and will be implemented when the
+                source setup works]
+
+            cmsd --clean
+
+                removes the container form docker
+
+            cmsd --version
+
+                prints out the verison of cmsd and the version of the container
+
+            cmsd --update
+
+                gets a new container form dockerhub
+
+            cmsd COMMAND
+
+                The command will be executed within the container, just as in
+                case of cms.
+
+            cmsd
+
+                When no command is specified cms will be run in interactive
+                mode.
+
+
+        """
+
+        doc = textwrap.dedent(self.do_cmsd.__doc__)
+        arguments = docopt(doc, help=False)
+
+        if arguments["--setup"]:
+            self.setup()
+            os.system(' '.join(['ls -l', self.config_path]))
+            if arguments["--download"]:
+                self.download_image()
+            else:
+                self.create_image()
+
+        elif arguments["--version"]:
+            print ("cmsd:", version)
+
+            container_version = "not yet implemented"
+            print("container:", container_version)
+            print ()
+            raise NotImplementedError
+
+        elif arguments["--clean"]:
+            self.delete_image()
+            self.clean()
+
+        elif arguments['--help']:
+            print(doc)
+
+        elif arguments['--image']:
+            #
+            # BUG does not work on windows. fix
+            #
+            if sys.platform == 'win32':
+                raise NotImplementedError
+            print("REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
+            os.system("docker images | fgrep cmsd_cloudmesh")
+
+        elif arguments["--stop"]:
+            self.stop()
+
+        elif arguments["--start"]:
+            self.up()
+
+        elif arguments["--ps"]:
+            self.ps()
+
+        elif arguments["--update"]:
+            self.update()
+
+        elif arguments["--shell"]:
+            self.shell()
+
+        elif arguments["COMMAND"]:
+            command = ' '.join(arguments["COMMAND"])
+            self.cms(command)
+
+        elif arguments["COMMAND"] is None:
+
+            command = ' '.join(arguments["COOMAND"])
+            print("start cms interactively")
+            os.system("docker exec -ti cmsd /bin/bash ")
+            #self.docker_compose("exec cmsd /bin/bash")
+
+        else:
+
+            print(doc)
+
+        return ""
+
+
 
 def main():
     command = CmsdCommand()
