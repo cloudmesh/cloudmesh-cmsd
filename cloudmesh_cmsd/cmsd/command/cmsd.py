@@ -46,6 +46,18 @@ RUN set -x \
                                                       curl \
                                                       wget \
                                                       sudo \
+                                                      gnupg \
+                                                      ca-certificates \
+                                                      vim
+RUN set -x \
+        && wget -q -O server.asc https://www.mongodb.org/static/pgp/server-4.2.asc \
+        && apt-key add server.asc \
+        && echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list \
+        && apt-get -y update \
+        && apt-get -y upgrade \
+        && apt-get -y --no-install-recommends install mongodb-org-shell \
+                                                      mongodb-org-tools
+RUN set -x \
         && apt-get -y install python3 \
                               python3-pip \
         && rm -rf /var/lib/apt/lists/* \
@@ -178,26 +190,27 @@ class CmsdCommand():
 
             cmsd setup [--download]
 
-                TBD
+                Setup configurations
 
             cmsd clean
 
-                TBD
+                Remove configurations and built images
 
             cmsd version
 
-                TBD
+                Print out the current version
 
             cmsd update
 
-                TBD
+                Clean up and re-configure
 
             cmsd help
 
+                Print help docs
 
             cmsd run
 
-
+                Start up VMs
         """
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
