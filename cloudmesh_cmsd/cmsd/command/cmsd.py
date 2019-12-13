@@ -252,6 +252,7 @@ class CmsdCommand():
         ::
 
           Usage:
+                cmsd yaml (native | docker)
                 cmsd --help
                 cmsd --setup [--download]
                 cmsd --clean
