@@ -326,12 +326,15 @@ class CmsdCommand():
         #
         # check for yaml file consistency for mongo
         #
+
+        #ok
         if config["cloudmesh.data.mongo.MODE"] != "docker" and \
             config["cloudmesh.data.mongo.MONGO_HOST"] != "mongo":
             print ("ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
             print()
             print(" cmsd --yaml docker")
             print()
+            return ""
 
         if arguments["--yaml"] and arguments["native"]: # implemented not tested
 
