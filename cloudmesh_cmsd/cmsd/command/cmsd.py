@@ -1,4 +1,15 @@
+#
+# This command is python2 and 3 compatible
+#
+
 from __future__ import print_function
+from cloudmesh_cmsd.cmsd.__version__ import version
+from pprint import pprint
+
+try:
+    from pathlib import Path
+except:
+    from pathlib2 import Path
 
 import os
 import shutil
@@ -7,11 +18,13 @@ import textwrap
 from cloudmesh.common.util import writefile
 from cloudmesh.configuration.Config import Config
 from docopt import docopt
+import sys
 
 dockercompose = """
 version: '3'
 services:
   cloudmesh:
+    container_name: cmsd
     build: .
     volumes:
       - .:/code
@@ -38,36 +51,46 @@ services:
 dockerfile = """
 FROM ubuntu:19.04
 
-RUN set -x \
-        && apt-get -y update \
-        && apt-get -y upgrade \
-        && apt-get -y --no-install-recommends install build-essential \
-                                                      git \
-                                                      curl \
-                                                      wget \
-                                                      sudo \
-                                                      gnupg \
-                                                      ca-certificates \
-                                                      vim
-RUN set -x \
-        && wget -q -O server.asc https://www.mongodb.org/static/pgp/server-4.2.asc \
-        && apt-key add server.asc \
-        && echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list \
-        && apt-get -y update \
-        && apt-get -y upgrade \
-        && apt-get -y --no-install-recommends install mongodb-org-shell \
-                                                      mongodb-org-tools
-RUN set -x \
-        && apt-get -y install python3 \
-                              python3-pip \
-        && rm -rf /var/lib/apt/lists/* \
-        && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
-        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 \
-        && pip install cloudmesh-installer
+# Gregor's version
+
+RUN apt-get -y update 
+RUN apt-get -y upgrade 
+RUN apt-get -y --no-install-recommends install \
+    build-essential \
+    git \
+    curl \
+    wget \
+    sudo \
+    net-tools \
+    gnupg
+RUN apt-get -y install \
+    python3 \
+    python3-pip
+RUN rm -rf /var/lib/apt/lists/* 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 
+RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+    
+RUN pip install cloudmesh-installer
+
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+RUN echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+
+RUN apt-get -y update 
+
+RUN apt-get install -y mongodb-org-shell
+
+#
+# keep the version fixed
+#
+RUN echo "mongodb-org-shell hold" | sudo dpkg --set-selections
+
+# RUN echo "mongodb-org hold" | sudo dpkg --set-selections
+# RUN echo "mongodb-org-server hold" | sudo dpkg --set-selections
+# RUN echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
+# RUN echo "mongodb-org-tools hold" | sudo dpkg --set-selections
 
 RUN mkdir cm
 WORKDIR cm
-
 RUN cloudmesh-installer git clone cloud
 RUN cloudmesh-installer install cloud -e
 
@@ -98,39 +121,86 @@ class CmsdCommand():
 
     def __init__(self):
         self.config_path = os.path.expanduser("~/.cloudmesh/cmsd")
+        self.compose = "docker-compose -f " + self.config_path + "/docker-compose.yml "
         self.username = ''
         self.password = ''
+
+    def docker_compose(self, command):
+        os.system(self.compose + command)
+
+    def update(self):
+        self.docker_compose("down")
+
+        self.delete_image()
+        try:
+            os.system("docker rmi cmsd_cloudmesh")
+        except:
+            pass
+        self.clean()
+        self.setup()
+        self.up()
+        self.create_image()
 
     def create_image(self):
         """
         reates image locally
         :return:
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml build')
+        self.docker_compose('build')
 
     def download_image(self):
         """
         downloads image from dockerhub
         :return:
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml pull mongo')
+        self.docker_compose('pull mongo')
 
     def delete_image(self):
         """
         deletes the cloudmesh image locally
         :return:
         """
-        if os.path.exists(f'{self.config_path}/docker-compose.yml'):
-            os.system(f'docker-compose -f {self.config_path}/docker-compose.yml rm')
+        self.docker_compose('rm')
 
-    def run(self, *args):
+    def run(self, command=""):
         """
         run the command via the docker container
 
-        :param args:
-        :return:
+        :param command: the cms command to be run in the container
         """
-        os.system(f'docker-compose -f {self.config_path}/docker-compose.yml up')
+        self.docker_compose('run ' + command)
+
+    def cms(self, command=""):
+        """
+        run the command via the docker container
+
+        :param command: the cms command to be run in the container
+        """
+        self.run("cloudmesh cms " + command)
+
+    def up(self):
+        """
+        starts up the containers for cms
+        """
+        self.docker_compose('up -d')
+
+    def ps(self):
+        """
+        docker-compose ps
+        """
+        self.docker_compose('ps')
+
+    def stop(self):
+        """
+        docker-compose stop
+        """
+        self.docker_compose('stop')
+
+    def shell(self):
+        """
+        docker-compose stop
+        """
+        self.docker_compose('exec cmsd sh')
 
     def setup(self, config_path="~/.cloudmesh/cmsd"):
         """
@@ -139,7 +209,14 @@ class CmsdCommand():
         :param config_path:
         :return:
         """
+
         self.config_path = os.path.expanduser(config_path)
+
+        d = Path(self.config_path)
+        if not d.exists():
+            print("creating",  self.config_path)
+            Path(self.config_path).mkdir(parents=True, exist_ok=True)
+
         self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
         self.password = Config()["cloudmesh"]["data"]["mongo"]["MONGO_PASSWORD"]
         if not os.path.exists(self.config_path):
@@ -165,94 +242,13 @@ class CmsdCommand():
         print(self.config_path)
         if os.path.exists(self.config_path):
             shutil.rmtree(self.config_path)
-            print('deleted')
+            print('deleting', self.config_path)
 
     def do_cmsd(self):
         """
         ::
 
           Usage:
-                cmsd setup [--download]
-                cmsd clean
-                cmsd version
-                cmsd update
-                cmsd help
-                cmsd run
-
-
-          This command passes the arguments to a docker container
-          that runs cloudmesh.
-
-          Arguments:
-              COMMAND the commands we bass along
-
-          Description:
-
-            cmsd setup [--download]
-
-                Setup configurations
-
-            cmsd clean
-
-                Remove configurations and built images
-
-            cmsd version
-
-                Print out the current version
-
-            cmsd update
-
-                Clean up and re-configure
-
-            cmsd help
-
-                Print help docs
-
-            cmsd run
-
-                Start up VMs
-        """
-
-        doc = textwrap.dedent(self.do_cmsd.__doc__)
-        arguments = docopt(doc, help=False)
-
-        if arguments["setup"]:
-            self.setup()
-            os.system(' '.join(['ls -l', self.config_path]))
-            if arguments["--download"]:
-                self.download_image()
-            else:
-                self.create_image()
-
-        elif arguments["clean"]:
-            self.delete_image()
-            self.clean()
-
-        elif arguments['help']:
-            print(doc)
-
-        elif arguments['version']:
-            os.system(f'cat {os.path.dirname(os.path.abspath(__file__))}/../__version__.py')
-
-        elif arguments['update']:
-            self.delete_image()
-            self.clean()
-            self.setup()
-
-        elif arguments['run']:
-            self.setup()
-            self.run(arguments)
-
-        else:
-            print(doc)
-        return ""
-
-   def do_cmsd_proper(self):
-        """
-        ::
-
-          Usage:
-                cmsd yaml (native | docker)
                 cmsd --help
                 cmsd --setup [--download]
                 cmsd --clean
@@ -371,9 +367,8 @@ class CmsdCommand():
 
         elif arguments["COMMAND"] is None:
 
-            command = ' '.join(arguments["COOMAND"])
             print("start cms interactively")
-            os.system("docker exec -ti cmsd /bin/bash ")
+            os.system("docker exec -ti cmsd /bin/bash")
             #self.docker_compose("exec cmsd /bin/bash")
 
         else:
@@ -381,7 +376,6 @@ class CmsdCommand():
             print(doc)
 
         return ""
-
 
 
 def main():

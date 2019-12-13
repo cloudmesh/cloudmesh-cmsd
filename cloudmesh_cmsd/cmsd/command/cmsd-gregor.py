@@ -250,6 +250,7 @@ class CmsdCommand():
 
           Usage:
                 cmsd --help
+                cmsd --yaml (native | docker)
                 cmsd --setup [--download]
                 cmsd --clean
                 cmsd --version
