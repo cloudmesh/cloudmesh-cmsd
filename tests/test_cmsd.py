@@ -4,6 +4,7 @@
 # pytest -v --capture=no  tests/test_cmsd.py:Test_cmsd.<METHIDNAME>
 ###############################################################
 import pytest
+from cloudmesh.common.StopWatch import StopWatch
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import HEADING
@@ -18,7 +19,7 @@ class TestCmsd:
         HEADING()
 
         Benchmark.Start()
-        result = Shell.execute("cmsd help", shell=True)
+        result = Shell.execute("cmsd --help", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -29,7 +30,7 @@ class TestCmsd:
         HEADING()
 
         Benchmark.Start()
-        result = Shell.execute("cmsd version", shell=True)
+        result = Shell.execute("cmsd --version", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -40,7 +41,7 @@ class TestCmsd:
         HEADING()
 
         Benchmark.Start()
-        result = Shell.execute("cmsd update", shell=True)
+        result = Shell.execute("cmsd --update", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -51,20 +52,39 @@ class TestCmsd:
     def test_setup(self):
         HEADING()
         Benchmark.Start()
-        result = Shell.execute("cmsd setup", shell=True)
+        result = Shell.execute("cmsd --setup", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
-
-        assert "['sample1', 'sample2', 'sample3', 'sample18']" in result
+        raise NotImplementedError
+        assert "not implemented" in result
 
     def test_clean(self):
         HEADING()
         Benchmark.Start()
-        result = Shell.execute("cmsd clean", shell=True)
+        result = Shell.execute("cmsd --clean", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
+        raise NotImplementedError
 
-        assert "['sample1', 'sample2', 'sample3', 'sample18']" in result
+        assert "not implemented" in result
+
+    def test_cms_command(self):
+        HEADING()
+        # commands = (command, asserion_text)*
+        commands = [("help", "NOT IMPLEMENTED")
+                    ("version", "NOT IMPLEMENTED")]
+
+        for c, txt in commands:
+            command = "cmsd " + c
+            StopWatch.start(command)
+            result = Shell.execute("cmsd help", shell=True)
+            StopWatch.start(command)
+            Benchmark.Stop()
+
+            assert txt in result
+
+
+
 
     def test_benchmark(self):
         Benchmark.print()
