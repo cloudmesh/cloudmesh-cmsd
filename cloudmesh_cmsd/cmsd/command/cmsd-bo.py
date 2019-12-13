@@ -140,8 +140,9 @@ class CmsdCommand():
         :return:
         """
         self.config_path = os.path.expanduser(config_path)
-        self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
-        self.password = Config()["cloudmesh"]["data"]["mongo"]["MONGO_PASSWORD"]
+        config = Config()
+        self.username = config["cloudmesh.data.mongo.MONGO_USERNAME"]
+        self.password = config["cloudmesh.data.mongo.MONGO_PASSWORD"]
         if not os.path.exists(self.config_path):
             print(self.config_path)
             os.makedirs(self.config_path)

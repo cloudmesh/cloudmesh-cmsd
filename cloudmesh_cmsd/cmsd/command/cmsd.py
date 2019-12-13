@@ -250,6 +250,7 @@ class CmsdCommand():
 
           Usage:
                 cmsd --help
+                cmsd --yaml (native | docker)
                 cmsd --setup [--download]
                 cmsd --clean
                 cmsd --version
@@ -274,6 +275,12 @@ class CmsdCommand():
             cmsd --help
 
                 prints this manual page
+
+            cmsd --yaml (native | docker)
+
+                switches the cloudmesh.yaml file to be used in native or docker
+                mode, for cmsd to work, it must be in docker mode.
+
 
             cmsd --image
 
@@ -314,7 +321,34 @@ class CmsdCommand():
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
 
-        if arguments["--setup"]:
+        config = Config()
+
+        #
+        # check for yaml file consistency for mongo
+        #
+        if config["cloudmesh.data.mongo.MODE"] != "docker" and \
+            config["cloudmesh.data.mongo.MONGO_HOST"] != "mongo":
+            print ("ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
+            print()
+            print(" cmsd --yaml docker")
+            print()
+
+        if arguments["--yaml"] and arguments["native"]: # implemented not tested
+
+            print ("switch to native cms mode")
+
+            config["cloudmesh.data.mongo.MODE"] = "native"
+            config["cloudmesh.data.mongo.MONGO_HOST"] = "127.0.0.1"
+            config.save()
+
+        elif arguments["--yaml"] and arguments["docker"]: # implemented not tested
+
+            print("switch to docker cms mode")
+            config["cloudmesh.data.mongo.MODE"] = "docker"
+            config["cloudmesh.data.mongo.MONGO_HOST"] = "mongo"
+            config.save()
+
+        elif arguments["--setup"]:
             self.setup()
             os.system(' '.join(['ls -l', self.config_path]))
             if arguments["--download"]:
