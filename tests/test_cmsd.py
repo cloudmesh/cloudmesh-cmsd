@@ -1,14 +1,14 @@
 ###############################################################
 # pytest -v --capture=no tests/test_cmsd.py
 # pytest -v  tests/test_cmsd.py
-# pytest -v --capture=no  tests/test_cmsd.py:Test_cmsd.<METHIDNAME>
+# pytest -v --capture=no  tests/test_cmsd.py:Test_cmsd.<METHODNAME>
 ###############################################################
 import pytest
 from cloudmesh.common.StopWatch import StopWatch
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import HEADING
-from cloudmesh.common3.Benchmark import Benchmark
+from cloudmesh.common.Benchmark import Benchmark
 Benchmark.debug()
 
 

@@ -6,10 +6,7 @@ from __future__ import print_function
 from cloudmesh_cmsd.cmsd.__version__ import version
 from pprint import pprint
 
-try:
-    from pathlib import Path
-except:
-    from pathlib2 import Path
+from pathlib import Path
 
 import os
 import shutil
@@ -69,7 +66,7 @@ RUN apt-get -y install \
 RUN rm -rf /var/lib/apt/lists/* 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 
 RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-    
+
 RUN pip install cloudmesh-installer
 
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
@@ -214,7 +211,7 @@ class CmsdCommand():
 
         d = Path(self.config_path)
         if not d.exists():
-            print("creating",  self.config_path)
+            print("creating", self.config_path)
             Path(self.config_path).mkdir(parents=True, exist_ok=True)
 
         self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
@@ -227,11 +224,14 @@ class CmsdCommand():
             writefile(self.config_path + '/Dockerfile', dockerfile)
 
         if not os.path.exists(self.config_path + '/docker-compose.yml'):
-            dc = dockercompose.replace("<your-username>", self.username).replace("<your-password>", self.password)
+            dc = dockercompose.replace("<your-username>",
+                                       self.username).replace("<your-password>",
+                                                              self.password)
             writefile(self.config_path + '/docker-compose.yml', dc)
 
         if not os.path.exists(self.config_path + '/mongo-init.js'):
-            et = entry.replace("<your-username>", self.username).replace("<your-password>", self.password)
+            et = entry.replace("<your-username>", self.username).replace(
+                "<your-password>", self.password)
             writefile(self.config_path + '/mongo-init.js', et)
 
     def clean(self):
@@ -327,24 +327,27 @@ class CmsdCommand():
         # check for yaml file consistency for mongo
         #
 
-        #ok
+        # ok
         if config["cloudmesh.data.mongo.MODE"] != "docker" and \
             config["cloudmesh.data.mongo.MONGO_HOST"] != "mongo":
-            print ("ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
+            print(
+                "ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
             print()
             print(" cmsd --yaml docker")
             print()
             return ""
 
-        if arguments["--yaml"] and arguments["native"]: # implemented not tested
+        if arguments["--yaml"] and arguments[
+            "native"]:  # implemented not tested
 
-            print ("switch to native cms mode")
+            print("switch to native cms mode")
 
             config["cloudmesh.data.mongo.MODE"] = "native"
             config["cloudmesh.data.mongo.MONGO_HOST"] = "127.0.0.1"
             config.save()
 
-        elif arguments["--yaml"] and arguments["docker"]: # implemented not tested
+        elif arguments["--yaml"] and arguments[
+            "docker"]:  # implemented not tested
 
             print("switch to docker cms mode")
             config["cloudmesh.data.mongo.MODE"] = "docker"
@@ -360,11 +363,11 @@ class CmsdCommand():
                 self.create_image()
 
         elif arguments["--version"]:
-            print ("cmsd:", version)
+            print("cmsd:", version)
 
             container_version = "not yet implemented"
             print("container:", container_version)
-            print ()
+            print()
             raise NotImplementedError
 
         elif arguments["--clean"]:
@@ -380,7 +383,8 @@ class CmsdCommand():
             #
             if sys.platform == 'win32':
                 raise NotImplementedError
-            print("REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
+            print(
+                "REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
             os.system("docker images | fgrep cmsd_cloudmesh")
 
         elif arguments["--stop"]:
@@ -406,7 +410,7 @@ class CmsdCommand():
 
             print("start cms interactively")
             os.system("docker exec -ti cmsd /bin/bash")
-            #self.docker_compose("exec cmsd /bin/bash")
+            # self.docker_compose("exec cmsd /bin/bash")
 
         else:
 
