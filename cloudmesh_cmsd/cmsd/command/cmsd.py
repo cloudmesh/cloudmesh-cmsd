@@ -4,55 +4,22 @@
 
 from __future__ import print_function
 
-from cloudmesh_cmsd.cmsd.__version__ import version
-
-from pathlib import Path
-
 import os
 import shutil
+import subprocess
+import sys
 import textwrap
 
-from cloudmesh.common.util import writefile
 from cloudmesh.configuration.Config import Config
 from docopt import docopt
-import sys
 
-dockercompose = """
-version: '3'
-services:
-  cloudmesh:
-    container_name: cmsd
-    build: .
-    volumes:
-      - .:/code
-      - ~/.cloudmesh:/root/.cloudmesh
-      - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub
-    depends_on:
-      - mongo
-    links:
-      - mongo
-  mongo:
-    image: mongo:4.2.2
-    container_name: mongodb
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: <your-username>
-      MONGO_INITDB_ROOT_PASSWORD: <your-password>
-      MONGO_INITDB_DATABASE: cloudmesh
-    ports:
-      - "27017-27019:27017-27019"
-    volumes:
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-"""
+from cloudmesh_cmsd.cmsd.__version__ import version
 
-dockerfile = """
-FROM ubuntu:19.04
+DOCKERFILE = """
+FROM python:3.7-buster
 
-<<<<<<< HEAD
-# Gregor's version
-
-RUN apt-get -y update 
-RUN apt-get -y upgrade 
+RUN apt-get -y update
+RUN apt-get -y upgrade
 RUN apt-get -y --no-install-recommends install \
     build-essential \
     git \
@@ -61,69 +28,44 @@ RUN apt-get -y --no-install-recommends install \
     sudo \
     net-tools \
     gnupg
-RUN apt-get -y install \
-    python3 \
-    python3-pip
-RUN rm -rf /var/lib/apt/lists/* 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 
-RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-
-RUN pip install cloudmesh-installer
 
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
-RUN echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 
-RUN apt-get -y update 
-
+RUN apt-get -y update
 RUN apt-get install -y mongodb-org-shell
 
-#
-# keep the version fixed
-#
-RUN echo "mongodb-org-shell hold" | sudo dpkg --set-selections
-
-# RUN echo "mongodb-org hold" | sudo dpkg --set-selections
-# RUN echo "mongodb-org-server hold" | sudo dpkg --set-selections
-# RUN echo "mongodb-org-mongos hold" | sudo dpkg --set-selections
-# RUN echo "mongodb-org-tools hold" | sudo dpkg --set-selections
-=======
-RUN set -x \
-        && apt-get -y update \
-        && apt-get -y upgrade \
-        && apt-get -y --no-install-recommends install build-essential \
-                                                      git \
-                                                      curl \
-                                                      wget \
-                                                      sudo \
-                                                      net-tools \
-                                                      gnupg \
-                                                      ca-certificates
-RUN set -x \
-        && wget -q -O server.asc https://www.mongodb.org/static/pgp/server-4.2.asc \
-        && apt-key add server.asc \
-        && echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list \
-        && apt-get -y update \
-        && apt-get -y upgrade \
-        && apt-get -y --no-install-recommends install mongodb-org-shell \
-                                                      mongodb-org-tools \
-        && echo "mongodb-org-shell hold" | dpkg --set-selections
-
-RUN set -x \
-        && apt-get -y install python3 \
-                              python3-pip \
-        && rm -rf /var/lib/apt/lists/* \
-        && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
-        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 \
-        && pip install cloudmesh-installer
->>>>>>> af5778fdb2a4bb7cc2f4735e25cc413db3b8ad66
+RUN pip install cloudmesh-installer
 
 RUN mkdir cm
 WORKDIR cm
 
 RUN cloudmesh-installer git clone cloud
-RUN cloudmesh-installer install cloud -e
+RUN cloudmesh-installer git clone aws
+RUN cloudmesh-installer git clone azure
 
-CMD exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"
+RUN cloudmesh-installer install cloud
+RUN cloudmesh-installer install azure
+RUN cloudmesh-installer install aws
+
+RUN mkdir $HOME/.cloudmesh
+RUN mkdir $HOME/.ssh
+
+COPY init.sh /
+RUN chmod +x /init.sh
+
+ENTRYPOINT /bin/bash /init.sh; /bin/bash
+
+#docker run --rm -d -v /aux/github/cm/docker/mongo_data:/data/db -p 127.0.0.1:27017:27017/tcp --name mongos mongo:4.2
+#docker run --rm -it -v /aux/github/cm/docker/cloudmesh_home:/root/.cloudmesh -v ~/.ssh:/root/.ssh --net host --name cms-container cloudmesh-cms
+"""
+
+INIT_SH = """
+#!/bin/bash
+
+cloudmesh-installer git pull cloud
+cloudmesh-installer git pull aws
+cloudmesh-installer git pull azure
 """
 
 entry = """
@@ -141,12 +83,40 @@ db.createUser(
 );
 """
 
+DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
+DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
+CMS_CONTAINER_NAME = "cloudmesh-cms-container"
+MONGO_CONTAINER_NAME = "cloudmesh-mongo-container"
+CMS_IMAGE_NAME = "cloudmesh-cms"
+
+
+def _run_os_command(cmd_str):
+    out = subprocess.check_output(cmd_str).decode("utf-8")
+    return out.strip() if not None else None
+
+
+def _docker_exec(cmd_str, container_name=CMS_CONTAINER_NAME):
+    if isinstance(cmd_str, list):
+        cmd = ["docker", "exec", container_name]
+        cmd.extend(cmd_str)
+        return _run_os_command(cmd)
+    else:
+        os.system(f"docker exec {container_name} " + cmd_str)
+
+
+def _is_container_running(name):
+    output = _run_os_command(["docker", "container", "ls",
+                              "--filter", f"name={name}",
+                              "--format", "\"{{.Names}}\""])
+
+    return name in output
+
 
 # you can use writefile(filename, entry) to for example write a file. make
 # sure to use path_expand and than create a dir. you can resuse commands form
 # cloudmesh.common, but no other class
 
-class CmsdCommand():
+class CmsdCommand:
 
     def __init__(self):
         self.config_path = os.path.expanduser("~/.cloudmesh/cmsd")
@@ -197,7 +167,7 @@ class CmsdCommand():
 
         :param command: the cms command to be run in the container
         """
-        self.docker_compose('run --rm --no-deps ' + command)
+        _docker_exec(command)
 
     def cms(self, command=""):
         """
@@ -205,76 +175,120 @@ class CmsdCommand():
 
         :param command: the cms command to be run in the container
         """
-        self.run("cloudmesh cms " + command)
+        _docker_exec("cms " + command)
 
     def up(self):
         """
         starts up the containers for cms
         """
-        self.docker_compose('up -d')
+        os.system(f"docker start {CMS_CONTAINER_NAME} {MONGO_CONTAINER_NAME}")
 
     def ps(self):
         """
         docker-compose ps
         """
-        self.docker_compose('ps')
+        os.system(f"docker ps")
 
     def stop(self):
         """
         docker-compose stop
         """
-        self.docker_compose('stop')
+        os.system(f"docker stop {CMS_CONTAINER_NAME} {MONGO_CONTAINER_NAME}")
 
     def shell(self):
         """
         docker-compose stop
         """
-        os.system('docker exec -it cmsd /bin/bash')
+        os.system(f"docker exec -it {CMS_CONTAINER_NAME} /bin/bash")
 
-    def setup(self, config_path="~/.cloudmesh/cmsd"):
+    def setup(self, cloudmesh_home_dir=None):
         """
         this will copy the docker compose yaml and json file into the config_path
         only if the files do not yet esixt
-        :param config_path:
+        :param cloudmesh_home_dir:
         :return:
         """
+        if cloudmesh_home_dir is None:
+            cloudmesh_home_dir = DEFAULT_CLOUDMESH_HOME_DIR
 
-        self.config_path = os.path.expanduser(config_path)
+        if not os.path.exists(cloudmesh_home_dir):
+            os.mkdir(cloudmesh_home_dir)
 
-        d = Path(self.config_path)
-        if not d.exists():
-            print("creating", self.config_path)
-            Path(self.config_path).mkdir(parents=True, exist_ok=True)
+        output = _run_os_command(["docker", "images", "--format",
+                                  "\"{{lower .Repository}}\"", CMS_IMAGE_NAME])
 
-        self.username = Config()["cloudmesh"]["data"]["mongo"]["MONGO_USERNAME"]
-        self.password = Config()["cloudmesh"]["data"]["mongo"]["MONGO_PASSWORD"]
-        if not os.path.exists(self.config_path):
-            print(self.config_path)
-            os.makedirs(self.config_path)
+        if CMS_IMAGE_NAME in output:
+            print(f"{CMS_IMAGE_NAME} image available!")
+        else:
+            print(f"{CMS_IMAGE_NAME} image not found! Building...")
 
-        if not os.path.exists(self.config_path + '/Dockerfile'):
-            writefile(self.config_path + '/Dockerfile', dockerfile)
+            temp_dir = cloudmesh_home_dir + '/temp'
+            os.mkdir(temp_dir)
 
-        if not os.path.exists(self.config_path + '/docker-compose.yml'):
-            dc = dockercompose.replace("<your-username>",
-                                       self.username).replace("<your-password>",
-                                                              self.password)
-            writefile(self.config_path + '/docker-compose.yml', dc)
+            with open(temp_dir + '/Dockerfile', 'w') as f:
+                f.write(DOCKERFILE)
 
-        if not os.path.exists(self.config_path + '/mongo-init.js'):
-            et = entry.replace("<your-username>", self.username).replace(
-                "<your-password>", self.password)
-            writefile(self.config_path + '/mongo-init.js', et)
+            with open(temp_dir + '/init.sh', 'w') as f:
+                f.write(INIT_SH)
+
+            os.system(f"docker build -t {CMS_IMAGE_NAME} {temp_dir}")
+
+            shutil.rmtree(temp_dir)
+
+        if _is_container_running(CMS_CONTAINER_NAME):
+            print(f"{CMS_CONTAINER_NAME} container running!")
+        else:
+            print(f"{CMS_CONTAINER_NAME} container not running! Starting...")
+            os.system(f"docker run -d -it "
+                      f"-v {cloudmesh_home_dir}:/root/.cloudmesh "
+                      f"-v ~/.ssh:/root/.ssh --net host "
+                      f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
+
+        _docker_exec(f"cms help")
+
+        if _is_container_running(MONGO_CONTAINER_NAME):
+            print(f"{MONGO_CONTAINER_NAME} container running!")
+        else:
+            print(f"{MONGO_CONTAINER_NAME} container not running! Starting...")
+            mongo_pw = _docker_exec(["cms", "config", "value",
+                                     "data.mongo.MONGO_PASSWORD"])
+            if "TBD" in mongo_pw:
+                print(f"WARN: Please set MONGO_PASSWORD in {cloudmesh_home_dir}"
+                      f"/cloudmesh.yaml file and rerun setup!")
+            else:
+                monogo_data_path = cloudmesh_home_dir + "/mongodb"
+                if not os.path.exists(monogo_data_path):
+                    os.mkdir(monogo_data_path)
+
+                _docker_exec("cms config set data.mongo.MODE=running")
+
+                os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
+                          f"-v {monogo_data_path}:/data/db "
+                          f"-p 127.0.0.1:27017:27017/tcp "
+                          f"-e MONGO_INITDB_ROOT_USERNAME=admin "
+                          f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
+                          f" mongo:4.2 ")
 
     def clean(self):
         """
         remove the ~/.cloudmesh/cmsd dir
         :return:
         """
-        print(self.config_path)
-        if os.path.exists(self.config_path):
-            shutil.rmtree(self.config_path)
-            print('deleting', self.config_path)
+
+        # data dir had to be deleted through the container as we dont have
+        # permission to delete the directory through the host OS
+        print("Removing mongoDB data dir")
+        _docker_exec("/bin/bash -c \"mongod --shutdown; rm -rf /data/db/*\"",
+                     container_name=MONGO_CONTAINER_NAME)
+        print("WARN: Please clean up CLOUDMESH_HOME_DIR/\"mongodb\" "
+              "if not empty!")
+
+        print("Stopping containers...")
+        self.stop()
+
+        print("Removing containers...")
+        os.system(f"docker container rm {CMS_CONTAINER_NAME} "
+                  f"{MONGO_CONTAINER_NAME}")
 
     def version(self):
         os.system("docker images | fgrep cmsd_cloudmesh")
@@ -286,7 +300,7 @@ class CmsdCommand():
           Usage:
                 cmsd --help
                 cmsd --yaml (native | docker)
-                cmsd --setup [--download]
+                cmsd --setup [CLOUDMESH_HOME_DIR] [--download]
                 cmsd --clean
                 cmsd --version
                 cmsd --update
@@ -363,14 +377,14 @@ class CmsdCommand():
         #
 
         # ok
-        if config["cloudmesh.data.mongo.MODE"] != "docker" and \
-            config["cloudmesh.data.mongo.MONGO_HOST"] != "mongo":
-            print(
-                "ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
-            print()
-            print(" cmsd --yaml docker")
-            print()
-            return ""
+        # if config["cloudmesh.data.mongo.MODE"] != "docker" and \
+        #         config["cloudmesh.data.mongo.MONGO_HOST"] != "mongo":
+        #     print(
+        #         "ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
+        #     print()
+        #     print(" cmsd --yaml docker")
+        #     print()
+        #     return ""
 
         if arguments["--yaml"] and arguments["native"]:
             # implemented not tested
@@ -390,19 +404,13 @@ class CmsdCommand():
             config.save()
 
         elif arguments["--setup"]:
-            self.setup()
-            os.system(' '.join(['ls -l', self.config_path]))
-            if arguments["--download"]:
-                self.download_image()
-            else:
-                self.create_image()
+            self.setup(cloudmesh_home_dir=arguments['CLOUDMESH_HOME_DIR'])
 
         elif arguments["--version"]:
             print("cmsd:", version)
             self.version()
 
         elif arguments["--clean"]:
-            self.delete_image()
             self.clean()
 
         elif arguments['--help']:
