@@ -7,7 +7,7 @@ cmsd will however use locally installed keys in `~/.ssh` and cloud
 configurations stred in `~/.cloudmesh/cloudmehs.yaml`. The yaml file
 will be created upon first call of cmsd if it is not available.
 
-## End user deployment (not yet supported)
+## End user deployment 
 
 Please uese a python virtualenv as to not interfere with your system python.
 Activate your python venv. Next just call
@@ -17,14 +17,13 @@ Activate your python venv. Next just call
 This will install a command `cmsd' in your environment that you can use
 as in place replacement for the cms command.
 
-## Source install
-
+## Developer Source install
 
 For developers it can be installed in an easy fashion with
 
     mkdir cm
     cd cm
-    pip install cloudmesh-installer
+    pip install cloudmesh-installer -U
     cloudmesh-installer git clone docker
     cloudmesh-installer git install docker
  
@@ -37,37 +36,11 @@ The source code is contained in
     cloudmesh-cmsd
 
 
-## Bugs
+## Mongo Configuration in ~/.cloudmesh/cloudmesh.yaml
 
-Despite the TA reporting it works, we could not install it we get the
-error.
+You will need to set the configuration MODE from native to running
 
-cmsd help
-ERROR: .FileNotFoundError: [Errno 2] No such file or directory: '/Users/grey/.cloudmesh/cmsd/docker-compose.yml'
-
-Clearly the yml file need to be deployed if it can not be found. Users
-must not have to install anything! This all needs to be part of the
-script.
-
-If you encounter this error. please send a mail to the instructors in
-piazza that you need this tool.
-
-## Missing setup documentation notes
-
-This has to be cleanued up and changed once we get the agreed upon 
-cmsd command whichis as we said from the beginning a plu gin replacement for cms
-
-The only thing we may have to think about are the options. to make sure
-they are not part of the command all function names not within cms are
-preceeded by a --
-
-git missing
-
-pip install -e .
-
-# NOT WAHAT WE ASKED FOR
-
-NMative setup (automatize this)
+Native setup (typicall you will have)
 
       MONGO_AUTOINSTALL: true
       MONGO_BREWINSTALL: false
@@ -78,7 +51,7 @@ NMative setup (automatize this)
       MONGO_HOST: 127.0.0.1
       MONGO_PORT: '27017'
 
-docker setup (utomatize this)
+docker setup (you need to change this to)
 
       MONGO_AUTOINSTALL: true
       MONGO_BREWINSTALL: false
@@ -89,33 +62,77 @@ docker setup (utomatize this)
       MONGO_HOST: 'mongo'
       MONGO_PORT: '27017'
 
-#docker container prune --force
-
-# docker stop b8487498e2d4c1503b0b86d67268157598f425e05cb
 
 
-MONGO setup
+## Manual Page
+
+```bash
+
+  Usage:
+        cmsd --help
+        cmsd --yaml (native | docker)
+        cmsd --setup [CLOUDMESH_HOME_DIR] [--download]
+        cmsd --clean
+        cmsd --version
+        cmsd --update
+        cmsd --image
+        cmsd --start
+        cmsd --stop
+        cmsd --ps
+        cmsd --shell
+        cmsd COMMAND... [--refresh]
+        cmsd
 
 
+  This command passes the arguments to a docker container
+  that runs cloudmesh.
+
+  Arguments:
+      COMMAND the commands we bass along
+
+  Description:
+
+    cmsd --help
+
+        prints this manual page
+
+    cmsd --yaml (native | docker)
+
+        switches the cloudmesh.yaml file to be used in native or docker
+        mode, for cmsd to work, it must be in docker mode.
 
 
-# terminal 1
+    cmsd --image
 
-cmsd --version
+        list the container
 
-cmsd help
-cmsd clean
-cmsd setup
-cmsd init
-cmsd run
+    cmsd --setup [--download]
 
-# inconvenient method too look up container id, that was outomated in gregors suggestion or suppoesd to be
+        downloads the source distribution, installes the image loaclly
 
-#terminal 2
+        [--download is not yet supported, and will be implemented when the
+        source setup works]
 
-docker exec -it ID /bin./bash
+    cmsd --clean
 
-# robo3t
+        removes the container form docker
 
-we can jsut use it and bind againt localhost and 27071 with password and username
+    cmsd --version
 
+        prints out the verison of cmsd and the version of the container
+
+    cmsd --update
+
+        gets a new container form dockerhub
+
+    cmsd COMMAND
+
+        The command will be executed within the container, just as in
+        case of cms.
+
+    cmsd
+
+        When no command is specified cms will be run in interactive
+        mode.
+
+```
