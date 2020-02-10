@@ -119,3 +119,76 @@ docker exec -it ID /bin./bash
 
 we can jsut use it and bind againt localhost and 27071 with password and username
 
+
+Manual Page
+
+```bash
+
+  Usage:
+        cmsd --help
+        cmsd --yaml (native | docker)
+        cmsd --setup [CLOUDMESH_HOME_DIR] [--download]
+        cmsd --clean
+        cmsd --version
+        cmsd --update
+        cmsd --image
+        cmsd --start
+        cmsd --stop
+        cmsd --ps
+        cmsd --shell
+        cmsd COMMAND... [--refresh]
+        cmsd
+
+
+  This command passes the arguments to a docker container
+  that runs cloudmesh.
+
+  Arguments:
+      COMMAND the commands we bass along
+
+  Description:
+
+    cmsd --help
+
+        prints this manual page
+
+    cmsd --yaml (native | docker)
+
+        switches the cloudmesh.yaml file to be used in native or docker
+        mode, for cmsd to work, it must be in docker mode.
+
+
+    cmsd --image
+
+        list the container
+
+    cmsd --setup [--download]
+
+        downloads the source distribution, installes the image loaclly
+
+        [--download is not yet supported, and will be implemented when the
+        source setup works]
+
+    cmsd --clean
+
+        removes the container form docker
+
+    cmsd --version
+
+        prints out the verison of cmsd and the version of the container
+
+    cmsd --update
+
+        gets a new container form dockerhub
+
+    cmsd COMMAND
+
+        The command will be executed within the container, just as in
+        case of cms.
+
+    cmsd
+
+        When no command is specified cms will be run in interactive
+        mode.
+
+```
