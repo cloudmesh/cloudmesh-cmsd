@@ -17,7 +17,7 @@ Activate your python venv. Next just call
 This will install a command `cmsd' in your environment that you can use
 as in place replacement for the cms command.
 
-## Source install
+## Developer Source install
 
 For developers it can be installed in an easy fashion with
 
