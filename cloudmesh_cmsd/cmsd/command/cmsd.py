@@ -256,9 +256,16 @@ class CmsdCommand:
                 print(f"WARN: Please set MONGO_PASSWORD in {cloudmesh_home_dir}"
                       f"/cloudmesh.yaml file and rerun setup!")
             else:
-                monogo_data_path = cloudmesh_home_dir + "/mongodb"
-                if not os.path.exists(monogo_data_path):
-                    os.mkdir(monogo_data_path)
+
+                if os.name == 'nt':
+                    print(f"Running on windows... creating a separate volume for mongodb")
+                    monogo_data_path = "cms_mongodb"
+                    os.system(f"docker volume create {monogo_data_path}")
+                else:
+                    monogo_data_path = cloudmesh_home_dir + "/mongodb"
+                    if not os.path.exists(monogo_data_path):
+                        os.mkdir(monogo_data_path)
+
 
                 _docker_exec("cms config set data.mongo.MODE=running")
 
