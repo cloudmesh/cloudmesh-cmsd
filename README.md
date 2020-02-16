@@ -38,30 +38,35 @@ cmsd --help
 
 ### cmsd initial setup 
 
-To run cmsd, you would need a directory that would be mounted as the `~/.cloudmesh` directory in the container. Let's call this `CLOUDMESH_HOME_DIR`.
+To run cmsd, you would need a directory that would be mounted as the `~/.cloudmesh` directory in the container. Let's call this `CLOUDMESH_HOME_DIR`. The directory name must not have in a space in it. For example `C:\.cloudmesh` will work, so does
+`C:\Users\gregor\.cloudmesh`, but not `C:\Users\gregor von Laszewski\.cloudmesh`
 
-- Run initial setup 
+Please also note that in docker setup you need to select the drive C for file access.
+
+Once you created the directory, you need to run the initial setup 
 
 ```  
 cmsd --setup <CLOUDMESH_HOME_DIR>
 ```
 
-- Run `cmsd --ps` to see if the `cloudmesh-cms-container` is running! Additionally, check `CLOUDMESH_HOME_DIR` contains the `cloudmesh.yaml` file. 
+Next, run `cmsd --ps` to see if the `cloudmesh-cms-container` is running! 
+Additionally, check `CLOUDMESH_HOME_DIR` contains the `cloudmesh.yaml` file. 
 
-- When running this setup initially, you would have to setup a password for the MongoDB. 
-
-```
-  cmsd config set cloudmesh.data.mongo.MONGO_PASSWORD=<some password>
-```
-
-- Run `cmsd --setup` again to complete the process. 
-
-- Check if both `cloudmesh-cms-container` and `cloudmesh-mongo-container` both are running, using `cmsd --ps`
-
-- You can check the `cloudmesh.yaml` file content by running, 
+Now that the first phase of the setup succeded, let us set up mongodb. You now need 
+to setup a password for the MongoDB. 
 
 ```
-  cmsd config cat
+> cmsd config set cloudmesh.data.mongo.MONGO_PASSWORD=<some password>
+```
+
+Run `cmsd --setup <CLOUDMESH_HOME_DIR>` again to complete the process. 
+
+Check if both `cloudmesh-cms-container` and `cloudmesh-mongo-container` both are running, using `cmsd --ps`
+
+You can check the `cloudmesh.yaml` file content by running, 
+
+```
+> cmsd config cat
 ```
 
 ### cmsd subsequent usages 
