@@ -11,11 +11,9 @@ will be created upon first call of cmsd if it is not available.
 
 ### Prerequesites
 
-- python 3.7<
-
-- Recommended to use a python virtual environment
-
-- Install *cloudmesh-installer*. Refer [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
+* python 3.8 or newer
+* We recommended to use a python virtual environment
+* Install *cloudmesh-installer*. Refer [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
 
 
 ### cmsd installation 
@@ -24,7 +22,7 @@ will be created upon first call of cmsd if it is not available.
 
 - Clone cloundmesh-cmsd repository to a directory of your preference. 
 ```
-  cloudmesh-installer git cmsd
+  cloudmesh-installer git clone cmsd
 ```
 
 - Install cloudmesh-cmsd using cloudmesh-installer 
