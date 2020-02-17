@@ -16,7 +16,7 @@ from docopt import docopt
 from cloudmesh_cmsd.cmsd.__version__ import version
 
 DOCKERFILE = """
-FROM python:3.7-buster
+FROM python:3.8.1-buster
 
 RUN apt-get -y update
 RUN apt-get -y upgrade

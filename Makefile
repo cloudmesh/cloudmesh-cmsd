@@ -145,3 +145,33 @@ log:
 	gitchangelog | fgrep -v ":dev:" | fgrep -v ":new:" > ChangeLog
 	git commit -m "chg: dev: Update ChangeLog" ChangeLog
 	git push
+
+######################################################################
+# DOCKER
+######################################################################
+
+#--no-cache=true
+
+image:
+	docker build  -t cloudmesh/cmsd:4.2.1 -t cloudmesh/bookmanager:latest .
+
+#
+# cm munts all parent directories into the container
+#
+cmsd:
+	docker run -v `pwd`/..:/cm -w /cm --rm -it cloudmesh/cmsd:4.2.1  /bin/bash
+
+shell:
+	docker run --rm -it cloudmesh/cmsd:4.2.1  /bin/bash
+
+dockerclean:
+	-docker kill $$(docker ps -q)
+	-docker rm $$(docker ps -a -q)
+	-docker rmi $$(docker images -q)
+
+push:
+	docker push cloudmesh/cmsd:4.2.1
+	docker push cloudmesh/cmsd:latest
+
+run:
+	docker run cloudmesh/cmsd:4.2.1 /bin/sh -c "cd /cm; git pull"
