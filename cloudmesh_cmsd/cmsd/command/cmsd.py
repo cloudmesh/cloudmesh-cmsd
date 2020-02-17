@@ -132,7 +132,7 @@ class CmsdCommand:
 
         self.delete_image()
         try:
-            os.system("docker rmi cmsd_cloudmesh")
+            os.system("docker rmi {CMS_IMAGE_NAME}")
         except:
             pass
         self.clean()
@@ -297,8 +297,12 @@ class CmsdCommand:
         os.system(f"docker container rm {CMS_CONTAINER_NAME} "
                   f"{MONGO_CONTAINER_NAME}")
 
+    def list_images(self):
+        os.system("docker images | fgrep {CMS_IMAGE_NAME}")
+
+
     def version(self):
-        os.system("docker images | fgrep cmsd_cloudmesh")
+        os.system("docker images | fgrep {CMS_IMAGE_NAME}")
 
     def do_cmsd(self):
         """
@@ -431,7 +435,7 @@ class CmsdCommand:
                 raise NotImplementedError
             print(
                 "REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
-            os.system("docker images | fgrep cmsd_cloudmesh")
+            self.list_images()
 
         elif arguments["--stop"]:
             self.stop()

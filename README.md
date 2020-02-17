@@ -4,7 +4,7 @@ Cloudmesh cmsd is a command to run cloudmesh in a container regardles of
 the OS. Thus it is extreemly easy to install and use.
 
 cmsd will however use locally installed keys in `~/.ssh` and cloud
-configurations stored in `~/.cloudmesh/cloudmehs.yaml`. The yaml file
+configurations stored in `~/.cloudmesh/cloudmesh.yaml`. The yaml file
 will be created upon first call of cmsd if it is not available.
 
 ## How to use *cmsd*
@@ -127,6 +127,11 @@ Activate your python venv. Next just call
     
 This will install a command `cmsd` in your environment that you can use
 as in place replacement for the cms command.
+
+The containers are called
+
+* `cloudmesh/cms` 
+
 
 ## Developer Source install
 
