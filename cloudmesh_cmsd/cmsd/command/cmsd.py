@@ -16,7 +16,7 @@ from docopt import docopt
 from cloudmesh_cmsd.cmsd.__version__ import version
 
 DOCKERFILE = """
-FROM python:3.8.1-buster
+FROM python:3.7-buster
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
@@ -87,7 +87,7 @@ DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
 DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
 CMS_CONTAINER_NAME = "cloudmesh-cms-container"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo-container"
-CMS_IMAGE_NAME = "cloudmesh/cms"
+CMS_IMAGE_NAME = "cloudmesh-cms"
 
 
 def _run_os_command(cmd_str):
@@ -132,7 +132,7 @@ class CmsdCommand:
 
         self.delete_image()
         try:
-            os.system("docker rmi {CMS_IMAGE_NAME}")
+            os.system("docker rmi cmsd_cloudmesh")
         except:
             pass
         self.clean()
@@ -297,12 +297,8 @@ class CmsdCommand:
         os.system(f"docker container rm {CMS_CONTAINER_NAME} "
                   f"{MONGO_CONTAINER_NAME}")
 
-    def list_images(self):
-        os.system("docker images | fgrep {CMS_IMAGE_NAME}")
-
-
     def version(self):
-        os.system("docker images | fgrep {CMS_IMAGE_NAME}")
+        os.system("docker images | fgrep cmsd_cloudmesh")
 
     def do_cmsd(self):
         """
@@ -435,7 +431,7 @@ class CmsdCommand:
                 raise NotImplementedError
             print(
                 "REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
-            self.list_images()
+            os.system("docker images | fgrep cmsd_cloudmesh")
 
         elif arguments["--stop"]:
             self.stop()
