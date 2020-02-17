@@ -153,16 +153,16 @@ log:
 #--no-cache=true
 
 image:
-	docker build  -t cloudmesh/cmsd:4.2.1 -t cloudmesh/bookmanager:latest .
+	docker build  -t cloudmesh/cms:4.2.1 -t cloudmesh/bookmanager:latest .
 
 #
 # cm munts all parent directories into the container
 #
 cmsd:
-	docker run -v `pwd`/..:/cm -w /cm --rm -it cloudmesh/cmsd:4.2.1  /bin/bash
+	docker run -v `pwd`/..:/cm -w /cm --rm -it cloudmesh/cms:4.2.1  /bin/bash
 
 shell:
-	docker run --rm -it cloudmesh/cmsd:4.2.1  /bin/bash
+	docker run --rm -it cloudmesh/cms:4.2.1  /bin/bash
 
 dockerclean:
 	-docker kill $$(docker ps -q)
@@ -170,8 +170,8 @@ dockerclean:
 	-docker rmi $$(docker images -q)
 
 push:
-	docker push cloudmesh/cmsd:4.2.1
-	docker push cloudmesh/cmsd:latest
+	docker push cloudmesh/cms:4.2.1
+	docker push cloudmesh/cms:latest
 
 run:
-	docker run cloudmesh/cmsd:4.2.1 /bin/sh -c "cd /cm; git pull"
+	docker run cloudmesh/cms:4.2.1 /bin/sh -c "cd /cm; git pull"
