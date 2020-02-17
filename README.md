@@ -9,6 +9,12 @@ will be created upon first call of cmsd if it is not available.
 
 ## How to use *cmsd*
 
+Important. You must have cms in debug off mode. to use the cmsd command
+
+```
+cms debug off
+```
+
 ### Prerequesites
 
 * Docker
