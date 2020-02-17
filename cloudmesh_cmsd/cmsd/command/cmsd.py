@@ -87,7 +87,7 @@ DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
 DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
 CMS_CONTAINER_NAME = "cloudmesh-cms-container"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo-container"
-CMS_IMAGE_NAME = "cloudmesh-cms"
+CMS_IMAGE_NAME = "cloudmesh/cms"
 
 
 def _run_os_command(cmd_str):
