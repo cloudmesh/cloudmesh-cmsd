@@ -1,4 +1,3 @@
-cloudmesh-cms
+cloudmesh-cm5
+cloudmesh-configuration
 cloudmesh-gui
-pathlib
-pathlib2
