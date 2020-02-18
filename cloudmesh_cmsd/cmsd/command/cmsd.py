@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 
+import sys
 import os
 import shutil
 import subprocess
@@ -374,10 +375,7 @@ class CmsdCommand:
 
         """
 
-        doc = textwrap.dedent(self.do_cmsd.__doc__)
-        arguments = docopt(doc, help=False)
 
-        config = Config()
 
         #
         # check for yaml file consistency for mongo
@@ -392,6 +390,21 @@ class CmsdCommand:
         #     print(" cmsd --yaml docker")
         #     print()
         #     return ""
+
+        if not sys.argv[1].startswith("--"):
+            # print("start cms interactively")
+            # os.system("docker exec -ti cmsd /bin/bash")
+
+            command = ' '.join(sys.argv[1:])
+            self.cms(command)
+
+            return ""
+
+
+        doc = textwrap.dedent(self.do_cmsd.__doc__)
+        arguments = docopt(doc, help=False)
+
+        config = Config()
 
         if arguments["--yaml"] and arguments["native"]:
             # implemented not tested
@@ -447,15 +460,6 @@ class CmsdCommand:
 
         elif arguments["--shell"]:
             self.shell()
-
-        elif arguments["COMMAND"]:
-            command = ' '.join(sys.argv[1:])
-            self.cms(command)
-
-        elif arguments["COMMAND"] is None:
-            print("start cms interactively")
-            os.system("docker exec -ti cmsd /bin/bash")
-            # self.docker_compose("exec cmsd /bin/bash")
 
         else:
             print(doc)
