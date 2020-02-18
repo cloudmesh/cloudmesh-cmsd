@@ -1,7 +1,8 @@
 ###############################################################
 # pytest -v --capture=no tests/test_cmsd.py
 # pytest -v  tests/test_cmsd.py
-# pytest -v --capture=no  tests/test_cmsd.py:Test_cmsd.<METHODNAME>
+# pytest -v --capture=no  tests/test_cmsd.py::Test_cmsd::<METHODNAME>
+# pytest -v --capture=no  tests/test_cmsd.py::TestCmsd::test_vm_list_json
 ###############################################################
 import pytest
 from cloudmesh.common.StopWatch import StopWatch
@@ -83,8 +84,14 @@ class TestCmsd:
 
             assert txt in result
 
+    def test_vm_list_json(self):
+        HEADING()
+        Benchmark.Start()
+        result = Shell.execute("cmsd vm list --refresh --output=json", shell=True)
+        Benchmark.Stop()
+        VERBOSE(result)
 
-
+        assert result.endswith("}")
 
     def test_benchmark(self):
         Benchmark.print()
