@@ -28,10 +28,9 @@ def readfile(filename):
 # add minimum requirements here
 #
 
-# cloudmesh-common
-# cloudmesh-configuration
 requiers = """
-pathlib
+cloudmesh-cms
+cloudmesh-gui
 """.split("\n")
 
 # dependency_links = ['http://github.com/nicolaiarocci/eve.git@develop']
@@ -80,6 +79,7 @@ setup(
     # namespace_packages=['cloudmesh'],
     entry_points={
         'console_scripts': [
+            'cmsg = cloudmesh_cmsd.cmsd.command.cmsg:main',
             'cmsd = cloudmesh_cmsd.cmsd.command.cmsd:main',
         ],
     }

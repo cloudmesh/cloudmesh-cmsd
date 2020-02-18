@@ -1,4 +1,4 @@
-# cloudmesh-common
-# cloudmesh-configuration
+cloudmesh-cms
+cloudmesh-gui
 pathlib
 pathlib2
