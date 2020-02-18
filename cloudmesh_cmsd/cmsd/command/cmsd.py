@@ -68,26 +68,11 @@ cloudmesh-installer git pull aws
 cloudmesh-installer git pull azure
 """
 
-entry = """
-db.createUser(
-    {
-        user: "<your-username>",
-        pwd: "<your-password>",
-        roles: [
-            {
-                role: "readWrite",
-                db: "cloudmesh"
-            }
-        ]
-    }
-);
-"""
-
-DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
+DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv("CLOUDMESH_CONFIG_DIR", os.path.expanduser("~/.cloudmesh"))
 DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
-CMS_CONTAINER_NAME = "cloudmesh-cms-container"
-MONGO_CONTAINER_NAME = "cloudmesh-mongo-container"
-CMS_IMAGE_NAME = "cloudmesh-cms"
+CMS_CONTAINER_NAME = "cloudmesh-cms"
+MONGO_CONTAINER_NAME = "cloudmesh-mongo"
+CMS_IMAGE_NAME = "cloudmesh/cms"
 
 
 def _run_os_command(cmd_str):
@@ -201,18 +186,18 @@ class CmsdCommand:
         """
         os.system(f"docker exec -it {CMS_CONTAINER_NAME} /bin/bash")
 
-    def setup(self, cloudmesh_home_dir=None):
+    def setup(self, cloudmesh_config_dir=None):
         """
         this will copy the docker compose yaml and json file into the config_path
         only if the files do not yet esixt
-        :param cloudmesh_home_dir:
+        :param cloudmesh_config_dir:
         :return:
         """
-        if cloudmesh_home_dir is None:
-            cloudmesh_home_dir = DEFAULT_CLOUDMESH_HOME_DIR
+        if cloudmesh_config_dir is None:
+            cloudmesh_config_dir = DEFAULT_CLOUDMESH_CONFIG_DIR
 
-        if not os.path.exists(cloudmesh_home_dir):
-            os.mkdir(cloudmesh_home_dir)
+        if not os.path.exists(cloudmesh_config_dir):
+            os.mkdir(cloudmesh_config_dir)
 
         output = _run_os_command(["docker", "images", "--format",
                                   "\"{{lower .Repository}}\"", CMS_IMAGE_NAME])
@@ -222,7 +207,7 @@ class CmsdCommand:
         else:
             print(f"{CMS_IMAGE_NAME} image not found! Building...")
 
-            temp_dir = cloudmesh_home_dir + '/temp'
+            temp_dir = cloudmesh_config_dir + '/temp'
             os.mkdir(temp_dir)
 
             with open(temp_dir + '/Dockerfile', 'w') as f:
@@ -240,7 +225,7 @@ class CmsdCommand:
         else:
             print(f"{CMS_CONTAINER_NAME} container not running! Starting...")
             os.system(f"docker run -d -it "
-                      f"-v {cloudmesh_home_dir}:/root/.cloudmesh "
+                      f"-v {cloudmesh_config_dir}:/root/.cloudmesh "
                       f"-v ~/.ssh:/root/.ssh --net host "
                       f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
 
@@ -253,7 +238,7 @@ class CmsdCommand:
             mongo_pw = _docker_exec(["cms", "config", "value",
                                      "data.mongo.MONGO_PASSWORD"])
             if "TBD" in mongo_pw:
-                print(f"WARN: Please set MONGO_PASSWORD in {cloudmesh_home_dir}"
+                print(f"\n\nWARNING: Please set MONGO_PASSWORD in {cloudmesh_config_dir}"
                       f"/cloudmesh.yaml file and rerun setup!")
             else:
 
@@ -262,7 +247,7 @@ class CmsdCommand:
                     monogo_data_path = "cms_mongodb"
                     os.system(f"docker volume create {monogo_data_path}")
                 else:
-                    monogo_data_path = cloudmesh_home_dir + "/mongodb"
+                    monogo_data_path = cloudmesh_config_dir + "/mongodb"
                     if not os.path.exists(monogo_data_path):
                         os.mkdir(monogo_data_path)
 
@@ -287,7 +272,7 @@ class CmsdCommand:
         print("Removing mongoDB data dir")
         _docker_exec("/bin/bash -c \"mongod --shutdown; rm -rf /data/db/*\"",
                      container_name=MONGO_CONTAINER_NAME)
-        print("WARN: Please clean up CLOUDMESH_HOME_DIR/\"mongodb\" "
+        print("WARN: Please clean up CLOUDMESH_CONFIG_DIR/\"mongodb\" "
               "if not empty!")
 
         print("Stopping containers...")
@@ -306,12 +291,10 @@ class CmsdCommand:
 
           Usage:
                 cmsd --help
-                cmsd --yaml (native | docker)
-                cmsd --setup [CLOUDMESH_HOME_DIR] [--download]
+                cmsd --setup [CLOUDMESH_CONFIG_DIR] 
                 cmsd --clean
                 cmsd --version
                 cmsd --update
-                cmsd --image
                 cmsd --start
                 cmsd --stop
                 cmsd --ps
@@ -331,16 +314,6 @@ class CmsdCommand:
             cmsd --help
 
                 prints this manual page
-
-            cmsd --yaml (native | docker)
-
-                switches the cloudmesh.yaml file to be used in native or docker
-                mode, for cmsd to work, it must be in docker mode.
-
-
-            cmsd --image
-
-                list the container
 
             cmsd --setup [--download]
 
@@ -377,41 +350,8 @@ class CmsdCommand:
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
 
-        config = Config()
-
-        #
-        # check for yaml file consistency for mongo
-        #
-
-        # ok
-        # if config["cloudmesh.data.mongo.MODE"] != "docker" and \
-        #         config["cloudmesh.data.mongo.MONGO_HOST"] != "mongo":
-        #     print(
-        #         "ERROR: The cloudmesh.yaml file is not configured for docker. Please use")
-        #     print()
-        #     print(" cmsd --yaml docker")
-        #     print()
-        #     return ""
-
-        if arguments["--yaml"] and arguments["native"]:
-            # implemented not tested
-
-            print("switch to native cms mode")
-
-            config["cloudmesh.data.mongo.MODE"] = "native"
-            config["cloudmesh.data.mongo.MONGO_HOST"] = "127.0.0.1"
-            config.save()
-
-        elif arguments["--yaml"] and arguments["docker"]:
-            # implemented not tested
-
-            print("switch to docker cms mode")
-            config["cloudmesh.data.mongo.MODE"] = "docker"
-            config["cloudmesh.data.mongo.MONGO_HOST"] = "mongo"
-            config.save()
-
-        elif arguments["--setup"]:
-            self.setup(cloudmesh_home_dir=arguments['CLOUDMESH_HOME_DIR'])
+        if arguments["--setup"]:
+            self.setup(cloudmesh_config_dir=arguments['CLOUDMESH_CONFIG_DIR'])
 
         elif arguments["--version"]:
             print("cmsd:", version)
@@ -422,16 +362,6 @@ class CmsdCommand:
 
         elif arguments['--help']:
             print(doc)
-
-        elif arguments['--image']:
-            #
-            # BUG does not work on windows. fix
-            #
-            if sys.platform == 'win32':
-                raise NotImplementedError
-            print(
-                "REPOSITORY                              TAG                 IMAGE ID            CREATED             SIZE")
-            os.system("docker images | fgrep cmsd_cloudmesh")
 
         elif arguments["--stop"]:
             self.stop()
@@ -455,7 +385,6 @@ class CmsdCommand:
         elif arguments["COMMAND"] is None:
             print("start cms interactively")
             os.system("docker exec -ti cmsd /bin/bash")
-            # self.docker_compose("exec cmsd /bin/bash")
 
         else:
             print(doc)
