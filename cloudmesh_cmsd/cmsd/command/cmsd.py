@@ -317,6 +317,7 @@ class CmsdCommand:
                 cmsd --stop
                 cmsd --ps
                 cmsd --shell
+                cmsd --gui COMMAND...
                 cmsd COMMAND... [--refresh]
                 cmsd
 
@@ -460,6 +461,16 @@ class CmsdCommand:
 
         elif arguments["--shell"]:
             self.shell()
+
+        elif arguments["--gui"]:
+
+            command =  " ".join(arguments["COMMAND"])
+
+            from cloudmesh.gui.command.gui import GuiCommand
+
+            gui = GuiCommand()
+            gui.do_gui(command)
+
 
         else:
             print(doc)
