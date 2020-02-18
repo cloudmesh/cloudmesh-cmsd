@@ -84,11 +84,24 @@ db.createUser(
 );
 """
 
+# if "CLOUDMESH_CONFIG_DIR" in os.environ:
+#    DEFAULT_CLOUDMESH_HOME_DIR = os.environ["CLOUDMESH_CONFIG_DIR"]
+# else:
+#     DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
+
+
 DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
 DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
+
+
+
 CMS_CONTAINER_NAME = "cloudmesh-cms-container"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo-container"
 CMS_IMAGE_NAME = "cloudmesh-cms"
+
+#CMS_CONTAINER_NAME = "cloudmesh-cms"
+#MONGO_CONTAINER_NAME = "cloudmesh-mongo"
+#CMS_IMAGE_NAME = "cloudmesh/cms"
 
 
 def _run_os_command(cmd_str):
@@ -468,9 +481,11 @@ class CmsdCommand:
 
             from cloudmesh.gui.command.gui import GuiCommand
 
+
             gui = GuiCommand()
             gui.do_gui(command)
 
+            print ("C", command)
 
         else:
             print(doc)
