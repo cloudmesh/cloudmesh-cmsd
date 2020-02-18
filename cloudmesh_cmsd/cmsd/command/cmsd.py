@@ -84,6 +84,9 @@ db.createUser(
 );
 """
 
+#    DEFAULT_CLOUDMESH_HOME_DIR = os.environ.get("CLOUDMESH_CONFIG_DIR") or os.path.expanduser("~/.cloudmesh")
+
+
 # if "CLOUDMESH_CONFIG_DIR" in os.environ:
 #    DEFAULT_CLOUDMESH_HOME_DIR = os.environ["CLOUDMESH_CONFIG_DIR"]
 # else:
