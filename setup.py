@@ -29,7 +29,7 @@ def readfile(filename):
 #
 
 requiers = """
-cloudmesh-cm5
+cloudmesh-cmd5
 cloudmesh-configuration
 cloudmesh-gui
 """.split("\n")
