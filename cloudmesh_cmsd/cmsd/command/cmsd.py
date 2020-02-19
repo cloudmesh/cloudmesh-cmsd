@@ -10,7 +10,6 @@ import subprocess
 import sys
 import textwrap
 
-from cloudmesh.configuration.Config import Config
 from docopt import docopt
 
 from cloudmesh_cmsd.cmsd.__version__ import version
@@ -40,10 +39,12 @@ RUN pip install cloudmesh-installer
 RUN mkdir cm
 WORKDIR cm
 
+RUN cloudmesh-installer git clone cms
 RUN cloudmesh-installer git clone cloud
 RUN cloudmesh-installer git clone aws
 RUN cloudmesh-installer git clone azure
 
+RUN cloudmesh-installer install cms
 RUN cloudmesh-installer install cloud
 RUN cloudmesh-installer install azure
 RUN cloudmesh-installer install aws
@@ -63,16 +64,19 @@ ENTRYPOINT /bin/bash /init.sh; /bin/bash
 INIT_SH = """
 #!/bin/bash
 
+cloudmesh-installer git pull cms
 cloudmesh-installer git pull cloud
 cloudmesh-installer git pull aws
 cloudmesh-installer git pull azure
 """
 
-DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv("CLOUDMESH_CONFIG_DIR", os.path.expanduser("~/.cloudmesh"))
+DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv("CLOUDMESH_CONFIG_DIR",
+                                         os.path.expanduser("~/.cloudmesh"))
 DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
 CMS_CONTAINER_NAME = "cloudmesh-cms"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo"
 CMS_IMAGE_NAME = "cloudmesh/cms"
+MONGO_VOLUME_NAME = "cloudmesh-mongo-vol"
 
 
 def _run_os_command(cmd_str):
@@ -97,56 +101,26 @@ def _is_container_running(name):
     return name in output
 
 
+def _get_config_value(conf):
+    return _docker_exec(["cms", "config", "value", conf])
+
+
 # you can use writefile(filename, entry) to for example write a file. make
 # sure to use path_expand and than create a dir. you can resuse commands form
 # cloudmesh.common, but no other class
 
 class CmsdCommand:
 
-    def __init__(self):
-        self.config_path = os.path.expanduser("~/.cloudmesh/cmsd")
-        self.compose = f'docker-compose -f {self.config_path}/docker-compose.yml'
-        self.username = ''
-        self.password = ''
-
-    def docker_compose(self, command):
-        os.system(f'{self.compose} {command}')
-
     def update(self):
-        self.docker_compose("down")
-
-        self.delete_image()
-        try:
-            os.system("docker rmi cmsd_cloudmesh")
-        except:
-            pass
-        self.clean()
-        self.setup()
-        self.up()
-        self.create_image()
-
-    def create_image(self):
         """
-        reates image locally
+        Updates container docker repos
         :return:
         """
-        self.docker_compose('build')
+        print(f"\nUpdating cloudmesh repos in {CMS_CONTAINER_NAME}")
+        _docker_exec("/bin/bash /init.sh")
 
-    def download_image(self):
-        """
-        downloads image from dockerhub
-        :return:
-        """
-        self.docker_compose('pull mongo')
-
-    def delete_image(self):
-        """
-        deletes the cloudmesh image locally
-        :return:
-        """
-        self.docker_compose('rm')
-
-    def run(self, command=""):
+    @staticmethod
+    def run(command=""):
         """
         run the command via the docker container
 
@@ -154,7 +128,8 @@ class CmsdCommand:
         """
         _docker_exec(command)
 
-    def cms(self, command=""):
+    @staticmethod
+    def cms(command=""):
         """
         run the command via the docker container
 
@@ -162,39 +137,45 @@ class CmsdCommand:
         """
         _docker_exec("cms " + command)
 
-    def up(self):
+    @staticmethod
+    def up():
         """
         starts up the containers for cms
         """
         os.system(f"docker start {CMS_CONTAINER_NAME} {MONGO_CONTAINER_NAME}")
 
-    def ps(self):
+    @staticmethod
+    def ps():
         """
         docker-compose ps
         """
         os.system(f"docker ps")
 
-    def stop(self):
+    @staticmethod
+    def stop():
         """
         docker-compose stop
         """
         os.system(f"docker stop {CMS_CONTAINER_NAME} {MONGO_CONTAINER_NAME}")
 
-    def shell(self):
+    @staticmethod
+    def shell():
         """
         docker-compose stop
         """
         os.system(f"docker exec -it {CMS_CONTAINER_NAME} /bin/bash")
 
-    def setup(self, cloudmesh_config_dir=None):
+    def setup(self):
         """
         this will copy the docker compose yaml and json file into the config_path
-        only if the files do not yet esixt
-        :param cloudmesh_config_dir:
+        only if the files do not yet exist
         :return:
         """
-        if cloudmesh_config_dir is None:
-            cloudmesh_config_dir = DEFAULT_CLOUDMESH_CONFIG_DIR
+        cloudmesh_config_dir = DEFAULT_CLOUDMESH_CONFIG_DIR
+
+        print(f"\nUsing CLOUDMESH_CONFIG_DIR={cloudmesh_config_dir}")
+        print(f"\nRunning cms help on host OS...")
+        _run_os_command(["cms", "help"])
 
         if not os.path.exists(cloudmesh_config_dir):
             os.mkdir(cloudmesh_config_dir)
@@ -203,9 +184,9 @@ class CmsdCommand:
                                   "\"{{lower .Repository}}\"", CMS_IMAGE_NAME])
 
         if CMS_IMAGE_NAME in output:
-            print(f"{CMS_IMAGE_NAME} image available!")
+            print(f"\n{CMS_IMAGE_NAME} image available!")
         else:
-            print(f"{CMS_IMAGE_NAME} image not found! Building...")
+            print(f"\n{CMS_IMAGE_NAME} image not found! Building...")
 
             temp_dir = cloudmesh_config_dir + '/temp'
             os.mkdir(temp_dir)
@@ -221,69 +202,70 @@ class CmsdCommand:
             shutil.rmtree(temp_dir)
 
         if _is_container_running(CMS_CONTAINER_NAME):
-            print(f"{CMS_CONTAINER_NAME} container running!")
+            print(f"\n{CMS_CONTAINER_NAME} container running!")
         else:
-            print(f"{CMS_CONTAINER_NAME} container not running! Starting...")
+            print(f"\n{CMS_CONTAINER_NAME} container not running! Starting...")
             os.system(f"docker run -d -it "
                       f"-v {cloudmesh_config_dir}:/root/.cloudmesh "
                       f"-v ~/.ssh:/root/.ssh --net host "
                       f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
 
-        _docker_exec(f"cms help")
+        if "TBD" in _get_config_value('profile.user'):
+            print(f"\nWARNING: cloudmesh profile not set!")
+            self.gui("profile")
 
         if _is_container_running(MONGO_CONTAINER_NAME):
-            print(f"{MONGO_CONTAINER_NAME} container running!")
+            print(f"\n{MONGO_CONTAINER_NAME} container running!")
         else:
-            print(f"{MONGO_CONTAINER_NAME} container not running! Starting...")
-            mongo_pw = _docker_exec(["cms", "config", "value",
-                                     "data.mongo.MONGO_PASSWORD"])
+            print(
+                f"\n{MONGO_CONTAINER_NAME} container not running! Starting...")
+
+            mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD")
+
             if "TBD" in mongo_pw:
-                print(f"\n\nWARNING: Please set MONGO_PASSWORD in {cloudmesh_config_dir}"
-                      f"/cloudmesh.yaml file and rerun setup!")
-            else:
+                print(f"\nWARNING: Mongo credentials not set!")
+                self.gui("mongo user")
+                mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD")
 
-                if os.name == 'nt':
-                    print(f"Running on windows... creating a separate volume for mongodb")
-                    monogo_data_path = "cms_mongodb"
-                    os.system(f"docker volume create {monogo_data_path}")
-                else:
-                    monogo_data_path = cloudmesh_config_dir + "/mongodb"
-                    if not os.path.exists(monogo_data_path):
-                        os.mkdir(monogo_data_path)
+            print(f"\nCreating a docker volume for mongodb...")
+            os.system(f"docker volume create {MONGO_VOLUME_NAME}")
 
+            _docker_exec("cms config set data.mongo.MODE=running")
 
-                _docker_exec("cms config set data.mongo.MODE=running")
-
-                os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
-                          f"-v {monogo_data_path}:/data/db "
-                          f"-p 127.0.0.1:27017:27017/tcp "
-                          f"-e MONGO_INITDB_ROOT_USERNAME=admin "
-                          f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
-                          f" mongo:4.2 ")
+            os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
+                      f"-v {MONGO_VOLUME_NAME}:/data/db "
+                      f"-p 127.0.0.1:27017:27017/tcp "
+                      f"-e MONGO_INITDB_ROOT_USERNAME=admin "
+                      f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
+                      f" mongo:4.2 ")
 
     def clean(self):
         """
         remove the ~/.cloudmesh/cmsd dir
         :return:
         """
-
-        # data dir had to be deleted through the container as we dont have
-        # permission to delete the directory through the host OS
-        print("Removing mongoDB data dir")
-        _docker_exec("/bin/bash -c \"mongod --shutdown; rm -rf /data/db/*\"",
-                     container_name=MONGO_CONTAINER_NAME)
-        print("WARN: Please clean up CLOUDMESH_CONFIG_DIR/\"mongodb\" "
-              "if not empty!")
-
-        print("Stopping containers...")
+        print("\nStopping containers...")
         self.stop()
 
-        print("Removing containers...")
+        print("\nRemoving containers...")
         os.system(f"docker container rm {CMS_CONTAINER_NAME} "
                   f"{MONGO_CONTAINER_NAME}")
 
-    def version(self):
+        print("\nRemoving volumes...")
+        os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
+
+    @staticmethod
+    def version():
         os.system("docker images | fgrep cmsd_cloudmesh")
+
+    def gui(self, command):
+        from cloudmesh.gui.command.gui import GuiCommand
+
+        gui = GuiCommand()
+
+        gui.do_gui(command)
+
+        print("Executed gui cmd: ", command)
 
     def do_cmsd(self):
         """
@@ -291,13 +273,14 @@ class CmsdCommand:
 
           Usage:
                 cmsd --help
-                cmsd --setup [CLOUDMESH_CONFIG_DIR] 
+                cmsd --setup
                 cmsd --clean
                 cmsd --version
                 cmsd --update
                 cmsd --start
                 cmsd --stop
                 cmsd --ps
+                cmsd --gui
                 cmsd --shell
                 cmsd COMMAND... [--refresh]
                 cmsd
@@ -315,12 +298,9 @@ class CmsdCommand:
 
                 prints this manual page
 
-            cmsd --setup [--download]
+            cmsd --setup
 
-                downloads the source distribution, installes the image loaclly
-
-                [--download is not yet supported, and will be implemented when the
-                source setup works]
+                downloads the source distribution, installs the image locally
 
             cmsd --clean
 
@@ -329,6 +309,9 @@ class CmsdCommand:
             cmsd --version
 
                 prints out the verison of cmsd and the version of the container
+
+            cmsd --gui
+                runs cloudmesh gui on the docker container
 
             cmsd --update
 
@@ -351,7 +334,7 @@ class CmsdCommand:
         arguments = docopt(doc, help=False)
 
         if arguments["--setup"]:
-            self.setup(cloudmesh_config_dir=arguments['CLOUDMESH_CONFIG_DIR'])
+            self.setup()
 
         elif arguments["--version"]:
             print("cmsd:", version)
@@ -377,6 +360,9 @@ class CmsdCommand:
 
         elif arguments["--shell"]:
             self.shell()
+
+        elif arguments["--gui"]:
+            self.gui(" ".join(arguments["COMMAND"]))
 
         elif arguments["COMMAND"]:
             command = ' '.join(sys.argv[1:])
