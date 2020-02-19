@@ -199,3 +199,21 @@ Usage:
         When no command is specified cms will be run in interactive
         mode.
 ```
+
+## Developer Source install	
+
+For developers it can be installed in an easy fashion with	
+
+    mkdir cm	
+    cd cm	
+    pip install cloudmesh-installer -U	
+    cloudmesh-installer git clone cmsd	
+    cloudmesh-installer git install cmsd	
+
+Now you can use the command 	
+
+    cmsd help	
+
+The source code is contained in 	
+
+    cloudmesh-cmsd
