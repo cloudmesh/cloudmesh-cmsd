@@ -52,12 +52,12 @@ Let us call this `CLOUDMESH_CONFIG_DIR`. Set `CLOUDMESH_CONFIG_DIR` as an enviro
 
 For Unix:
 ```
-> export CLOUDMESH_CONFIG_DIR= <path to CLOUDMESH_HOME_DIR>
+> export CLOUDMESH_CONFIG_DIR=<path to CLOUDMESH_HOME_DIR>
 ```
 
 For Windows:
 ```
-> setx CLOUDMESH_CONFIG_DIR "<path to CLOUDMESH_HOME_DIR>"
+> set CLOUDMESH_CONFIG_DIR=<path to CLOUDMESH_HOME_DIR>
 ```
 
 > NOTE: 
