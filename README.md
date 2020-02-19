@@ -26,61 +26,71 @@ cms debug off
 ### cmsd installation 
 
 - Activate the python virtual environment
-- Clone `cloundmesh-cmsd` repository to a directory of your preference (we reccommend `~\cm`)
+- Clone `cloundmesh-cmsd` repository to a directory of your preference (`~\cm` 
+is recommended to use)
 
 ```
-  cloudmesh-installer git clone cmsd
+> cloudmesh-installer git clone cmsd
 ```
 
 - Install cloudmesh-cmsd using cloudmesh-installer 
 
 ```
-  cloudmesh-installer install cmsd
+> cloudmesh-installer install cmsd
 ```
 
 - Check if the installation succeded
 
 ```
-cmsd --help
+> cmsd --help
 ```
 
-### cmsd initial setup 
+### cmsd setup 
 
-To run cmsd, you would need a configuration directory that is mounted into the containee
-Let us call this `CLOUDMESH_HOME_DIR`. The directory name must not have in a space in it. 
+- To run cmsd, you would need a configuration directory that is mounted into the container.
+Let us call this `CLOUDMESH_CONFIG_DIR`. Set `CLOUDMESH_CONFIG_DIR` as an environment variable. 
 
-Clarification for Windows users: For example `C:\.cloudmesh` will work, so does
-`C:\Users\gregor\.cloudmesh`, but not `C:\Users\gregor von Laszewski\.cloudmesh`
+For Unix:
+```
+> export CLOUDMESH_CONFIG_DIR=<path to CLOUDMESH_HOME_DIR>
+```
 
-Please also note that in docker setup you need to select the drive C for file access.
+For Windows:
+```
+> set CLOUDMESH_CONFIG_DIR=<path to CLOUDMESH_HOME_DIR>
+```
 
-Once you created the directory, you need to run the initial setup 
+> NOTE: 
+> - `CLOUDMESH_CONFIG_DIR` path must not have in any spaces.
+> - Clarification for Windows users: 
+>  - For example `C:\.cloudmesh` will work, so does 
+> `C:\Users\gregor\.cloudmesh`, but not `C:\Users\gregor von Laszewski\.cloudmesh`)
+>   - Make sure that the drive of the `CLOUDMESH_CONFIG_DIR` is granted file 
+>     access in Docker settings
+
+- Run setup. If you are running setup on an empty `CLOUDMESH_CONFIG_DIR`,  you 
+will be asked to key in some details that are required for the setup, such as 
+profile details, Mongo DB credentials, etc. 
 
 ```  
-> cmsd --setup <CLOUDMESH_HOME_DIR>
+> cmsd --setup 
 ```
 
-Next, run `cmsd --ps` to see if the `cloudmesh-cms-container` is running! 
-Additionally, check `CLOUDMESH_HOME_DIR` contains the `cloudmesh.yaml` file. 
-
-Now that the first phase of the setup succeded, let us set up mongodb with the cmsd container. You now need 
-to setup a password for the MongoDB. 
+- Run the following command to see if the `cloudmesh-cms-container` is running! 
+Additionally, check `CLOUDMESH_CONFIG_DIR` contains the `cloudmesh.yaml` file. 
 
 ```
-> cmsd config set cloudmesh.data.mongo.MONGO_PASSWORD=<some password>
+> cmsd --ps
 ```
 
-Run `cmsd --setup <CLOUDMESH_HOME_DIR>` **again** to complete the process. 
-
-Check if both `cloudmesh-cms-container` and `cloudmesh-mongo-container` both are running, using `cmsd --ps`
-
-You can check the `cloudmesh.yaml` file content by running, 
+- Run the following to verify if the configurations you entered have been 
+properly reflected in the `cloudmesh.yaml` file. 
 
 ```
 > cmsd config cat
 ```
 
-### cmsd subsequent usages 
+### cmsd usages 
 
 - To stop the containers, use `cmsd --stop`. 
 - To start/restart the containers, use `cmsd --start`. 
@@ -90,38 +100,29 @@ You can check the `cloudmesh.yaml` file content by running,
 
 ### MongoDB and Mongo client connections  
 
-cmsd is running an official MongoDB container from Docker Hub. Refer [here](https://hub.docker.com/_/mongo) and the mongo server instance is bound to the `127.0.0.1:27071` port. Therefore you can use any Mongo client to explore the database by connecting to this port. 
+cmsd is running an official MongoDB container from Docker Hub. Refer [here](https://hub.docker.com/_/mongo).
 
-> NOTE:
-
-> Unix - 
-> At the setup, `CLOUDMESH_HOME_DIR/mongodb`  directory will be created and used as the data directory for mongo DB. We recommend that you ues `~/.cloudmesh` as `CLOUDMESH_HOME_DIR`. YOu can set it with 
-
-> ```
-> $ export CLOUDMESH_HOME_DIR=~/.cloudmesh
-> ```
-
-> Windows - 
-> Docker windows directory mounting does not work properly with mongo container. See [here](https://github.com/docker/for-win/issues/2189). Hence, a docker volume will be mounted as the data directory. YOu could set is to a directory in your `C:` drive that you create, but it must not have a space in its name.
-
+Mongo server container is bound to `127.0.0.1:27071` port. Therefore you can use 
+any Mongo client to explore the database by connecting to this port. 
 
 ### Example usecase - Creating a vm in AWS 
 
-- Create an AWS account and add the authentication information in the `CLOUDMESH_HOME_DIR/cloudmesh.yaml` file. Refer [Cloudmesh Manual - AWS](https://cloudmesh.github.io/cloudmesh-manual/accounts/aws.html)
+- Create an AWS account and add the authentication information in the 
+`CLOUDMESH_HOME_DIR/cloudmesh.yaml` file. Refer [Cloudmesh Manual - AWS](https://cloudmesh.github.io/cloudmesh-manual/accounts/aws.html)
 
 - Set cloud to `aws`
 ```
-  cmsd set cloud=aws 
+> cmsd set cloud=aws 
 ```
 
 - Set AWS key name 
 ```
-  cmsd set key=<key name> 
+> cmsd set key=<key name> 
 ```
 
 - Boot a vm with the default config
 ```
-  cmsd vm boot 
+>  cmsd vm boot 
 ```
 
 ## End user deployment 
@@ -136,42 +137,22 @@ as in place replacement for the cms command.
 
 The containers are called
 
-* `cloudmesh/cms` 
-
-
-## Developer Source install
-
-For developers it can be installed in an easy fashion with
-
-    mkdir cm
-    cd cm
-    pip install cloudmesh-installer -U
-    cloudmesh-installer git clone cmsd
-    cloudmesh-installer git install cmsd
- 
-Now you can use the command 
-
-    cmsd help
-
-The source code is contained in 
-
-    cloudmesh-cmsd
-
+- `cloudmesh/cms` 
+- `cloudmesh/mongo` 
 
 ## Manual Page
 
 ```bash
-
-  Usage:
+Usage:
         cmsd --help
-        cmsd --setup [CLOUDMESH_HOME_DIR]
+        cmsd --setup
         cmsd --clean
         cmsd --version
         cmsd --update
-        cmsd --image
         cmsd --start
         cmsd --stop
         cmsd --ps
+        cmsd --gui
         cmsd --shell
         cmsd COMMAND... [--refresh]
         cmsd
@@ -189,13 +170,9 @@ The source code is contained in
 
         prints this manual page
 
-    cmsd --image
+    cmsd --setup
 
-        list the container
-
-    cmsd --setup [CLOUDMESH_HOME_DIR]
-
-        Sets up cmsd 
+        downloads the source distribution, installs the image locally
 
     cmsd --clean
 
@@ -204,6 +181,9 @@ The source code is contained in
     cmsd --version
 
         prints out the verison of cmsd and the version of the container
+
+    cmsd --gui
+        runs cloudmesh gui on the docker container
 
     cmsd --update
 
@@ -218,5 +198,22 @@ The source code is contained in
 
         When no command is specified cms will be run in interactive
         mode.
-
 ```
+
+## Developer Source install	
+
+For developers it can be installed in an easy fashion with	
+
+    mkdir cm	
+    cd cm	
+    pip install cloudmesh-installer -U	
+    cloudmesh-installer git clone cmsd	
+    cloudmesh-installer git install cmsd	
+
+Now you can use the command 	
+
+    cmsd help	
+
+The source code is contained in 	
+
+    cloudmesh-cmsd
