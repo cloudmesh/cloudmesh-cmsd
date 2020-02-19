@@ -4,7 +4,6 @@
 
 from __future__ import print_function
 
-import sys
 import os
 import shutil
 import subprocess
@@ -84,27 +83,11 @@ db.createUser(
 );
 """
 
-#    DEFAULT_CLOUDMESH_HOME_DIR = os.environ.get("CLOUDMESH_CONFIG_DIR") or os.path.expanduser("~/.cloudmesh")
-
-
-# if "CLOUDMESH_CONFIG_DIR" in os.environ:
-#    DEFAULT_CLOUDMESH_HOME_DIR = os.environ["CLOUDMESH_CONFIG_DIR"]
-# else:
-#     DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
-
-
 DEFAULT_CLOUDMESH_HOME_DIR = os.path.expanduser("~/.cloudmesh")
 DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
-
-
-
 CMS_CONTAINER_NAME = "cloudmesh-cms-container"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo-container"
 CMS_IMAGE_NAME = "cloudmesh-cms"
-
-#CMS_CONTAINER_NAME = "cloudmesh-cms"
-#MONGO_CONTAINER_NAME = "cloudmesh-mongo"
-#CMS_IMAGE_NAME = "cloudmesh/cms"
 
 
 def _run_os_command(cmd_str):
@@ -333,7 +316,6 @@ class CmsdCommand:
                 cmsd --stop
                 cmsd --ps
                 cmsd --shell
-                cmsd --gui COMMAND...
                 cmsd COMMAND... [--refresh]
                 cmsd
 
@@ -392,7 +374,10 @@ class CmsdCommand:
 
         """
 
+        doc = textwrap.dedent(self.do_cmsd.__doc__)
+        arguments = docopt(doc, help=False)
 
+        config = Config()
 
         #
         # check for yaml file consistency for mongo
@@ -407,21 +392,6 @@ class CmsdCommand:
         #     print(" cmsd --yaml docker")
         #     print()
         #     return ""
-
-        if not sys.argv[1].startswith("--"):
-            # print("start cms interactively")
-            # os.system("docker exec -ti cmsd /bin/bash")
-
-            command = ' '.join(sys.argv[1:])
-            self.cms(command)
-
-            return ""
-
-
-        doc = textwrap.dedent(self.do_cmsd.__doc__)
-        arguments = docopt(doc, help=False)
-
-        config = Config()
 
         if arguments["--yaml"] and arguments["native"]:
             # implemented not tested
@@ -478,17 +448,14 @@ class CmsdCommand:
         elif arguments["--shell"]:
             self.shell()
 
-        elif arguments["--gui"]:
+        elif arguments["COMMAND"]:
+            command = ' '.join(sys.argv[1:])
+            self.cms(command)
 
-            command =  " ".join(arguments["COMMAND"])
-
-            from cloudmesh.gui.command.gui import GuiCommand
-
-
-            gui = GuiCommand()
-            gui.do_gui(command)
-
-            print ("C", command)
+        elif arguments["COMMAND"] is None:
+            print("start cms interactively")
+            os.system("docker exec -ti cmsd /bin/bash")
+            # self.docker_compose("exec cmsd /bin/bash")
 
         else:
             print(doc)
