@@ -283,7 +283,6 @@ class CmsdCommand:
                 cmsd --gui COMMAND...
                 cmsd --shell
                 cmsd COMMAND...
-                cmsd
 
 
           This command passes the arguments to a docker container
@@ -381,6 +380,11 @@ class CmsdCommand:
         elif arguments["--gui"]:
             self.gui(" ".join(arguments["COMMAND"]))
 
+        # not implemented
+        #elif arguments["--pipe"]:
+        #    print("start cms interactively")
+        #    os.system(f"docker exec {CMS_CONTAINER_NAME} /usr/local/bin/cms")
+        #    return ""
 
         else:
             print(doc)
