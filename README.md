@@ -1,11 +1,11 @@
 # Cloudmesh cmsd
 
-Cloudmesh cmsd is a command to run cloudmesh in a container regardles of
-the OS. Thus it is extreemly easy to install and use.
+Cloudmesh cmsd is a command to run cloudmesh in a container regardless of
+the OS. Thus it is extremely easy to install and use.
 
-cmsd will however use locally installed keys in `~/.ssh` and cloud
-configurations stored in `~/.cloudmesh/cloudmesh.yaml`. The yaml file
-will be created upon first call of cmsd if it is not available.
+cmsd will, however, use locally installed keys in `~/.ssh` and cloud
+configurations stored in `~/.cloudmesh/cloudmesh.yaml`. The YAML file
+is created upon the first call of `cmsd` if it is not available.
 
 ## How to use *cmsd*
 
@@ -19,7 +19,7 @@ cms debug off
 
 * Docker
 * python 3.8 or newer
-* We strongle recommended to use a python virtual environment
+* We strongly recommended using a python virtual environment
 * Install *cloudmesh-installer* by following the documentation in 
   the [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
 
@@ -28,10 +28,12 @@ cms debug off
 Please use a python virtualenv as to not interfere with your system python.
 Activate your python venv. Next just call
 
-    pip install cloudmesh-cmsd
+```bash
+$ pip install cloudmesh-cmsd
+```
     
 This will install a command `cmsd` in your environment that you can use
-as in place replacement for the cms command.
+as an in-place replacement for the cms command.
 
 The containers are called
 
@@ -39,30 +41,26 @@ The containers are called
 - `cloudmesh-mongo` 
 
 
-```bash
-$ pip install cloudmesh-cmsd
-```
 
+## Developer Source install    
 
-## Developer Source install	
-
-For developers it can be installed in an easy fashion with	
+For developers, it can be installed in an easy fashion with 
 
     python3.8 -m venv ~/ENV3
     source ~/ENV3/bin/activate
-    mkdir cm	
-    cd cm	
-    pip install cloudmesh-installer -U	
-    cloudmesh-installer git clone cmsd	
-    cloudmesh-installer git install cmsd	
+    mkdir cm   
+    cd cm  
+    pip install cloudmesh-installer -U 
+    cloudmesh-installer git clone cmsd 
+    cloudmesh-installer git install cmsd   
 
-Now you can use the command 	
+Now you can use the command    
 
-    cmsd help	
+    cmsd help  
     ...
     cmsd --setup
 
-The source code is contained in 	
+The source code is contained in    
 
     cloudmesh-cmsd
 
@@ -127,7 +125,7 @@ cmsd is running an official MongoDB container from Docker Hub. Refer [here](http
 Mongo server container is bound to `127.0.0.1:27071` port. Therefore you can use 
 any Mongo client to explore the database by connecting to this port. 
 
-### Example usecase - Creating a vm in AWS 
+### Example Usecase - Creating a vm in AWS 
 
 Create an AWS account and add the authentication information in the 
 `CLOUDMESH_HOME_DIR/cloudmesh.yaml` file. Refer [Cloudmesh Manual - AWS](https://cloudmesh.github.io/cloudmesh-manual/accounts/aws.html)
@@ -197,7 +195,7 @@ Usage:
 
     cmsd --update
 
-        gets a new container form dockerhub
+        gets a new container from dockerhub
 
     cmsd COMMAND
 
