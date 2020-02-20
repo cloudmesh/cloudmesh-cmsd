@@ -9,6 +9,7 @@ from cloudmesh.common.StopWatch import StopWatch
 from cloudmesh.common.Shell import Shell
 from cloudmesh.common.debug import VERBOSE
 from cloudmesh.common.util import HEADING
+from cloudmesh.common.util import readfile
 from cloudmesh.common.Benchmark import Benchmark
 Benchmark.debug()
 
@@ -24,21 +25,24 @@ class TestCmsd:
         Benchmark.Stop()
         VERBOSE(result)
 
-        assert "quit" in result
-        assert "clear" in result
+        assert  "cmsd --setup" in result
+        Benchmark.Status(True)
 
     def test_version(self):
         HEADING()
 
+        version = readfile("VERSION")
         Benchmark.Start()
         result = Shell.execute("cmsd --version", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
-        assert "quit" in result
-        assert "clear" in result
+        msg = f"cmsd: {version}"
+        print ("Version string to e tested:", msg)
+        assert  msg in result
+        Benchmark.Status(True)
 
-    def test_update(self):
+    def exclude_test_update(self):
         HEADING()
 
         Benchmark.Start()
@@ -48,9 +52,9 @@ class TestCmsd:
 
         assert "quit" in result
         assert "clear" in result
+        Benchmark.Status(True)
 
-
-    def test_setup(self):
+    def exclude_test_setup(self):
         HEADING()
         Benchmark.Start()
         result = Shell.execute("cmsd --setup", shell=True)
@@ -59,7 +63,7 @@ class TestCmsd:
         raise NotImplementedError
         assert "not implemented" in result
 
-    def test_clean(self):
+    def exclude_test_clean(self):
         HEADING()
         Benchmark.Start()
         result = Shell.execute("cmsd --clean", shell=True)
@@ -69,29 +73,53 @@ class TestCmsd:
 
         assert "not implemented" in result
 
-    def test_cms_command(self):
+    def exclude_broken_test_cms_command(self):
         HEADING()
         # commands = (command, asserion_text)*
-        commands = [("help", "NOT IMPLEMENTED")
-                    ("version", "NOT IMPLEMENTED")]
+        commands = [("help", "quit"),
+                    ("version", "cloudmesh_aws")]
 
         for c, txt in commands:
             command = "cmsd " + c
             StopWatch.start(command)
-            result = Shell.execute("cmsd help", shell=True)
+            result = Shell.execute(f"cmsd {c}", shell=True)
             StopWatch.start(command)
             Benchmark.Stop()
-
             assert txt in result
 
-    def test_vm_list_json(self):
+
+    def test_banner_hello(self):
+        HEADING()
+        Benchmark.Start()
+        result = Shell.execute("cmsd banner hello", shell=True)
+        Benchmark.Stop()
+        VERBOSE(result)
+
+        assert "# hello" in result
+        Benchmark.Status("# hello" in result)
+
+    def test_vm_list_json_refresh(self):
         HEADING()
         Benchmark.Start()
         result = Shell.execute("cmsd vm list --refresh --output=json", shell=True)
         Benchmark.Stop()
-        VERBOSE(result)
+        # VERBOSE(result)
 
         assert result.endswith("}")
+        Benchmark.Status(True)
+
+
+    def test_vm_list_json(self):
+        HEADING()
+        Benchmark.Start()
+        result = Shell.execute("cmsd vm list --output=json", shell=True)
+        Benchmark.Stop()
+        # VERBOSE(result)
+
+        assert result.endswith("}")
+        #Benchmark.Status(True)
+
+
 
     def test_benchmark(self):
-        Benchmark.print()
+        Benchmark.print(sysinfo=True)
