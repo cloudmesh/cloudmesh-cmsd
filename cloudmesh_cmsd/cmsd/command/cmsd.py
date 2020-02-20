@@ -333,9 +333,10 @@ class CmsdCommand:
         if len(sys.argv) == 1:
             # if arguments["COMMAND"] is None
             print("start cms interactively")
-            os.system("docker exec -ti cmsd /bin/bash")
+            os.system(f"docker exec -ti {CMS_CONTAINER_NAME} /usr/local/bin/cms")
+            return ""
 
-        if not sys.argv[1].startswith("--"):
+        elif not sys.argv[1].startswith("--"):
 
             # print("start cms interactively")
             # os.system("docker exec -ti cmsd /bin/bash")
