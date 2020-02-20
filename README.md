@@ -367,3 +367,21 @@ $ cmsd vm boot
    cms> quit
    ```
  
+ 4. Access container shell for development
+ 
+    ```bash
+    $ cmsd --shell
+
+    root@docker-desktop:/cm# ls -1
+    cloudmesh-aws
+    cloudmesh-azure
+    cloudmesh-cloud
+    cloudmesh-cmd5
+    cloudmesh-common
+    cloudmesh-configuration
+    cloudmesh-inventory
+    cloudmesh-openstack
+    cloudmesh-sys
+    cloudmesh-test
+    root@docker-desktop:/cm# 
+    ```
