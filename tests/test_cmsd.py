@@ -62,6 +62,8 @@ class TestCmsd:
         VERBOSE(result)
         raise NotImplementedError
         assert "not implemented" in result
+        Benchmark.Status(True)
+
 
     def exclude_test_clean(self):
         HEADING()
@@ -72,20 +74,7 @@ class TestCmsd:
         raise NotImplementedError
 
         assert "not implemented" in result
-
-    def exclude_broken_test_cms_command(self):
-        HEADING()
-        # commands = (command, asserion_text)*
-        commands = [("help", "quit"),
-                    ("version", "cloudmesh_aws")]
-
-        for c, txt in commands:
-            command = "cmsd " + c
-            StopWatch.start(command)
-            result = Shell.execute(f"cmsd {c}", shell=True)
-            StopWatch.start(command)
-            Benchmark.Stop()
-            assert txt in result
+        Benchmark.Status(True)
 
 
     def test_banner_hello(self):
@@ -96,7 +85,7 @@ class TestCmsd:
         VERBOSE(result)
 
         assert "# hello" in result
-        Benchmark.Status("# hello" in result)
+        Benchmark.Status(True)
 
     def test_vm_list_json_refresh(self):
         HEADING()
@@ -117,7 +106,7 @@ class TestCmsd:
         # VERBOSE(result)
 
         assert result.endswith("}")
-        #Benchmark.Status(True)
+        Benchmark.Status(True)
 
 
 
