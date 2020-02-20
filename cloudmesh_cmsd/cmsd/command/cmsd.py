@@ -282,6 +282,7 @@ class CmsdCommand:
                 cmsd --ps
                 cmsd --gui COMMAND...
                 cmsd --shell
+                cmsd --pipe
                 cmsd COMMAND...
 
 
@@ -381,10 +382,11 @@ class CmsdCommand:
             self.gui(" ".join(arguments["COMMAND"]))
 
         # not implemented
-        #elif arguments["--pipe"]:
-        #    print("start cms interactively")
-        #    os.system(f"docker exec {CMS_CONTAINER_NAME} /usr/local/bin/cms")
-        #    return ""
+        elif arguments["--pipe"]:
+            os.system(f"docker exec -i  {CMS_CONTAINER_NAME} /bin/bash -c /usr/local/bin/cms")
+            return ""
+
+        # "cat setup.json |  docker run -i  ubuntu /bin/bash -c 'cat'"
 
         else:
             print(doc)
