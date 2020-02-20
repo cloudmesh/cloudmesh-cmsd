@@ -280,9 +280,9 @@ class CmsdCommand:
                 cmsd --start
                 cmsd --stop
                 cmsd --ps
-                cmsd --gui
+                cmsd --gui COMMAND...
                 cmsd --shell
-                cmsd COMMAND... [--refresh]
+                cmsd COMMAND...
                 cmsd
 
 
@@ -330,6 +330,22 @@ class CmsdCommand:
 
         """
 
+        if len(sys.argv) == 1:
+            # if arguments["COMMAND"] is None
+            print("start cms interactively")
+            os.system("docker exec -ti cmsd /bin/bash")
+
+        if not sys.argv[1].startswith("--"):
+
+            # print("start cms interactively")
+            # os.system("docker exec -ti cmsd /bin/bash")
+
+            command = ' '.join(sys.argv[1:])
+            self.cms(command)
+
+            return ""
+
+
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
 
@@ -364,13 +380,6 @@ class CmsdCommand:
         elif arguments["--gui"]:
             self.gui(" ".join(arguments["COMMAND"]))
 
-        elif arguments["COMMAND"]:
-            command = ' '.join(sys.argv[1:])
-            self.cms(command)
-
-        elif arguments["COMMAND"] is None:
-            print("start cms interactively")
-            os.system("docker exec -ti cmsd /bin/bash")
 
         else:
             print(doc)
