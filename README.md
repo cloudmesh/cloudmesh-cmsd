@@ -151,7 +151,7 @@ Boot a vm with the default config
 ## Manual Page
 
 ```bash
-Usage:
+  Usage:
         cmsd --help
         cmsd --setup
         cmsd --clean
@@ -160,10 +160,10 @@ Usage:
         cmsd --start
         cmsd --stop
         cmsd --ps
-        cmsd --gui
+        cmsd --gui COMMAND...
         cmsd --shell
-        cmsd COMMAND... [--refresh]
-        cmsd
+        cmsd --pipe
+        cmsd COMMAND...
 
 
   This command passes the arguments to a docker container
@@ -195,7 +195,7 @@ Usage:
 
     cmsd --update
 
-        gets a new container from dockerhub
+        gets a new container form dockerhub
 
     cmsd COMMAND
 
@@ -206,4 +206,101 @@ Usage:
 
         When no command is specified cms will be run in interactive
         mode.
+
+
+
 ```
+## Quickstart
+
+### macOS with python 3.8.1 from python.org
+
+1. Requirements:
+
+   * Have a sername without a space.
+   * Have docker installed and accessible to the user. 
+   * Have python 3.8.1 from python.org installed.
+
+   Create a key `~/.ssh/id_rsa` if you do not already have one 
+   
+   ```bash
+   $ ssh-keygen
+   ```
+
+2. Install:
+
+   Open a new terminal, 
+
+   ```bash
+   $ python3.8 -m venv ~/ENV3
+   $ source ~/ENV3/bin/activate
+   $ pip install cloudmesh-cmsd
+   ```
+   
+
+3. Setup:
+
+   ```bash
+   $ cmsd help
+   $ cmsd --gui profile
+   $ cmsd --gui activate
+   $ cmsd --gui mongo user
+   $ cmsd --setup
+   $ cmsd init
+   ```
+4. Do some simple tests to see if it works
+
+   Testing help command: 
+   
+   ```bash
+   $ cmsd help
+   ```
+   
+   Output:
+   
+   ```
+   Documented commands (type help <topic>):
+   ========================================
+   EOF       config     help       man        quit      ssh        vcluster      
+   admin     container  host       open       register  start      version       
+   aws       data       image      openstack  sec       stop       vm            
+   azure     debug      info       pause      service   stopwatch  workflow_draft
+   banner    default    init       plugin     set       sys      
+   check     echo       inventory  provider   shell     test     
+   clear     flavor     ip         py         sleep     var      
+   commands  group      key        q          source    vbox 
+   ```
+   
+   Testing banner command:
+   
+   ```bash
+   $ cmsd banner hello
+   ```
+   
+   Output: 
+   
+   ```
+   banner
+   ######################################################################
+   # hello
+   ######################################################################
+   ```
+   
+   Testing sec command:
+   
+   ```bash
+   $ cmsd sec rule list
+   ```
+   
+   Output: 
+   
+   ```
+   +-------+----------+-----------+-----------+
+   | Name  | Protocol | Ports     | IP Range  |
+   +-------+----------+-----------+-----------+
+   | ssh   | tcp      | 22:22     | 0.0.0.0/0 |
+   | icmp  | icmp     |           | 0.0.0.0/0 |
+   | flask | tcp      | 8000:8000 | 0.0.0.0/0 |
+   | http  | tcp      | 80:80     | 0.0.0.0/0 |
+   | https | tcp      | 443:443   | 0.0.0.0/0 |
+   +-------+----------+-----------+-----------+
+   ```
