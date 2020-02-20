@@ -20,7 +20,8 @@ cms debug off
 * Docker
 * python 3.8 or newer
 * We strongle recommended to use a python virtual environment
-* Install *cloudmesh-installer* by following the documentation in the [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
+* Install *cloudmesh-installer* by following the documentation in 
+  the [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
 
 ### User instalation
 
