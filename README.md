@@ -25,6 +25,20 @@ cms debug off
 
 ### User instalation
 
+Please use a python virtualenv as to not interfere with your system python.
+Activate your python venv. Next just call
+
+    pip install cloudmesh-cmsd
+    
+This will install a command `cmsd` in your environment that you can use
+as in place replacement for the cms command.
+
+The containers are called
+
+- `cloudmesh-cms` 
+- `cloudmesh-mongo` 
+
+
 ```bash
 $ pip install cloudmesh-cmsd
 ```
@@ -135,21 +149,6 @@ Boot a vm with the default config
 ```
 >  cmsd vm boot 
 ```
-
-## End user deployment 
-
-Please uese a python virtualenv as to not interfere with your system python.
-Activate your python venv. Next just call
-
-    pip install cloudmesh-cmsd
-    
-This will install a command `cmsd` in your environment that you can use
-as in place replacement for the cms command.
-
-The containers are called
-
-- `cloudmesh/cms` 
-- `cloudmesh/mongo` 
 
 ## Manual Page
 
