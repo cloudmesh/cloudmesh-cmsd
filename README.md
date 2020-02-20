@@ -46,24 +46,28 @@ The containers are called
 
 For developers, it can be installed in an easy fashion with 
 
-    python3.8 -m venv ~/ENV3
-    source ~/ENV3/bin/activate
-    mkdir cm   
-    cd cm  
-    pip install cloudmesh-installer -U 
-    cloudmesh-installer git clone cmsd 
-    cloudmesh-installer git install cmsd   
+```bash
+$ python3.8 -m venv ~/ENV3
+$ source ~/ENV3/bin/activate
+$ mkdir cm   
+$ cd cm  
+$ pip install cloudmesh-installer -U 
+$ cloudmesh-installer git clone cmsd 
+$ cloudmesh-installer git install cmsd   
+```
 
 Now you can use the command    
 
-    cmsd help  
-    ...
-    cmsd --setup
+```
+cmsd help  
+cmsd --setup
+```
 
 The source code is contained in    
 
-    cloudmesh-cmsd
-
+```
+cloudmesh-cmsd
+```
 
 ### cmsd setup 
 
@@ -72,7 +76,7 @@ Let us call this `CLOUDMESH_CONFIG_DIR`. Set `CLOUDMESH_CONFIG_DIR` as an enviro
 
 For Unix:
 ```
-> export CLOUDMESH_CONFIG_DIR=<path to CLOUDMESH_HOME_DIR>
+$ export CLOUDMESH_CONFIG_DIR=<path to CLOUDMESH_HOME_DIR>
 ```
 
 For Windows:
@@ -93,29 +97,29 @@ will be asked to key in some details that are required for the setup, such as
 profile details, Mongo DB credentials, etc. 
 
 ```  
-> cmsd --setup 
+$ cmsd --setup 
 ```
 
 Run the following command to see if the `cloudmesh-cms-container` is running! 
 Additionally, check `CLOUDMESH_CONFIG_DIR` contains the `cloudmesh.yaml` file. 
 
 ```
-> cmsd --ps
+$ cmsd --ps
 ```
 
 Run the following to verify if the configurations you entered have been 
 properly reflected in the `cloudmesh.yaml` file. 
 
 ```
-> cmsd config cat
+$ cmsd config cat
 ```
 
 ### cmsd usages 
 
-- To stop the containers, use `cmsd --stop`. 
-- To start/restart the containers, use `cmsd --start`. 
-- To clean the containers (remove stopped containers), use `cmsd --clean`. 
-- To log into the running `cloudmesh-cms-container`, use `cmsd --shell`. 
+* To stop the containers, use `cmsd --stop`. 
+* To start/restart the containers, use `cmsd --start`. 
+* To clean the containers (remove stopped containers), use `cmsd --clean`. 
+* To log into the running `cloudmesh-cms-container`, use `cmsd --shell`. 
 
 
 ### MongoDB and Mongo client connections  
@@ -133,19 +137,19 @@ Create an AWS account and add the authentication information in the
 Set cloud to `aws`
 
 ```
-> cmsd set cloud=aws 
+$ cmsd set cloud=aws 
 ```
 
 Set AWS key name 
 
 ```
-> cmsd set key=<key name> 
+$ cmsd set key=<key name> 
 ```
 
 Boot a vm with the default config
 
 ```
->  cmsd vm boot 
+$ cmsd vm boot 
 ```
 
 ## Manual Page
