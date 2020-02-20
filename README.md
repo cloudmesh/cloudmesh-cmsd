@@ -22,32 +22,39 @@ cms debug off
 * We strongle recommended to use a python virtual environment
 * Install *cloudmesh-installer* by following the documentation in the [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
 
+### User instalation
 
-### cmsd installation 
-
-- Activate the python virtual environment
-- Clone `cloundmesh-cmsd` repository to a directory of your preference (`~\cm` 
-is recommended to use)
-
-```
-> cloudmesh-installer git clone cmsd
+```bash
+$ pip install cloudmesh-cmsd
 ```
 
-- Install cloudmesh-cmsd using cloudmesh-installer 
 
-```
-> cloudmesh-installer install cmsd
-```
+## Developer Source install	
 
-- Check if the installation succeded
+For developers it can be installed in an easy fashion with	
 
-```
-> cmsd --help
-```
+    python3.8 -m venv ~/ENV3
+    source ~/ENV3/bin/activate
+    mkdir cm	
+    cd cm	
+    pip install cloudmesh-installer -U	
+    cloudmesh-installer git clone cmsd	
+    cloudmesh-installer git install cmsd	
+
+Now you can use the command 	
+
+    cmsd help	
+    ...
+    cmsd --setup
+
+The source code is contained in 	
+
+    cloudmesh-cmsd
+
 
 ### cmsd setup 
 
-- To run cmsd, you would need a configuration directory that is mounted into the container.
+To run cmsd, you would need a configuration directory that is mounted into the container.
 Let us call this `CLOUDMESH_CONFIG_DIR`. Set `CLOUDMESH_CONFIG_DIR` as an environment variable. 
 
 For Unix:
@@ -68,7 +75,7 @@ For Windows:
 >   - Make sure that the drive of the `CLOUDMESH_CONFIG_DIR` is granted file 
 >     access in Docker settings
 
-- Run setup. If you are running setup on an empty `CLOUDMESH_CONFIG_DIR`,  you 
+Run setup. If you are running setup on an empty `CLOUDMESH_CONFIG_DIR`,  you 
 will be asked to key in some details that are required for the setup, such as 
 profile details, Mongo DB credentials, etc. 
 
@@ -76,14 +83,14 @@ profile details, Mongo DB credentials, etc.
 > cmsd --setup 
 ```
 
-- Run the following command to see if the `cloudmesh-cms-container` is running! 
+Run the following command to see if the `cloudmesh-cms-container` is running! 
 Additionally, check `CLOUDMESH_CONFIG_DIR` contains the `cloudmesh.yaml` file. 
 
 ```
 > cmsd --ps
 ```
 
-- Run the following to verify if the configurations you entered have been 
+Run the following to verify if the configurations you entered have been 
 properly reflected in the `cloudmesh.yaml` file. 
 
 ```
@@ -107,20 +114,23 @@ any Mongo client to explore the database by connecting to this port.
 
 ### Example usecase - Creating a vm in AWS 
 
-- Create an AWS account and add the authentication information in the 
+Create an AWS account and add the authentication information in the 
 `CLOUDMESH_HOME_DIR/cloudmesh.yaml` file. Refer [Cloudmesh Manual - AWS](https://cloudmesh.github.io/cloudmesh-manual/accounts/aws.html)
 
-- Set cloud to `aws`
+Set cloud to `aws`
+
 ```
 > cmsd set cloud=aws 
 ```
 
-- Set AWS key name 
+Set AWS key name 
+
 ```
 > cmsd set key=<key name> 
 ```
 
-- Boot a vm with the default config
+Boot a vm with the default config
+
 ```
 >  cmsd vm boot 
 ```
@@ -199,21 +209,3 @@ Usage:
         When no command is specified cms will be run in interactive
         mode.
 ```
-
-## Developer Source install	
-
-For developers it can be installed in an easy fashion with	
-
-    mkdir cm	
-    cd cm	
-    pip install cloudmesh-installer -U	
-    cloudmesh-installer git clone cmsd	
-    cloudmesh-installer git install cmsd	
-
-Now you can use the command 	
-
-    cmsd help	
-
-The source code is contained in 	
-
-    cloudmesh-cmsd
