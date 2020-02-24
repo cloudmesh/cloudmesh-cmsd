@@ -3,43 +3,57 @@
 Cloudmesh cmsd is a command to run cloudmesh in a container regardless of
 the OS. Thus it is extremely easy to install and use.
 
-cmsd will, however, use locally installed keys in `~/.ssh` and cloud
-configurations stored in `~/.cloudmesh/cloudmesh.yaml`. The YAML file
-is created upon the first call of `cmsd` if it is not available.
+cmsd will, however, use locally installed keys in `~/.ssh` and typically
+cloud configurations stored in `~/.cloudmesh/cloudmesh.yaml`. The YAML
+file is created upon the first call of `cmsd` if it is not available.
+
+
+### Prerequesites
+
+* Docker
+* Python 3.8 or newer
+* We strongly recommended using a python virtual environment
 
 ## How to use *cmsd*
 
 Important. You must have cms in debug off mode. to use the cmsd command
 
 ```
-cms debug off
+$ cms debug off
 ```
 
-### Prerequesites
-
-* Docker
-* python 3.8 or newer
-* We strongly recommended using a python virtual environment
-* Install *cloudmesh-installer* by following the documentation in 
-  the [Cloudmesh manual](https://cloudmesh.github.io/cloudmesh-manual/installation/install.html#installation-of-cloudmesh-source-install-for-developers)
 
 ### User instalation
 
-Please use a python virtualenv as to not interfere with your system python.
-Activate your python venv. Next just call
+Please use a python virtualenv as to not interfere with your system
+python and activate your python venv.
+
+Linux, osx: 
+
+```bash
+$ python3.8 -m venv ~/ENV3
+$ source ~/ENV3/bin/activate
+$ pip install pip -U 
+```
+
+In Windows you can do this with 
+
+```bash
+$ python -m venv ENV3
+$ ENV3\Scripts\activate
+$ pip install pip -U 
+```
+
+Now you can install cloudmesh cmsd simply with 
 
 ```bash
 $ pip install cloudmesh-cmsd
 ```
     
-This will install a command `cmsd` in your environment that you can use
-as an in-place replacement for the cms command.
-
-The containers are called
+It will install cloudmesh in containers. The containers are called
 
 - `cloudmesh-cms` 
 - `cloudmesh-mongo` 
-
 
 
 ### Developer Source install    
@@ -72,10 +86,21 @@ $ cloudmesh-installer git clone cmsd
 $ cloudmesh-installer install cmsd   
 ```
 
-### cmsd setup 
+### Defult setup
 
-To run cmsd, you would need a configuration directory that is mounted into the container.
-Let us call this `CLOUDMESH_CONFIG_DIR`. Set `CLOUDMESH_CONFIG_DIR` as an environment variable. 
+The defualt setup is simply done with 
+
+```bash
+$ cmsd --setup
+```
+
+### Custom cmsd setup 
+
+To run cmsd, you would need a configuration directory that is mounted
+into the container. 
+
+Let us call this `CLOUDMESH_CONFIG_DIR`. Set
+`CLOUDMESH_CONFIG_DIR` as an environment variable.
 
 For Unix:
 ```
@@ -106,6 +131,10 @@ $ cmsd --setup
 Run the following command to see if the `cloudmesh-cms-container` is running! 
 Additionally, check `CLOUDMESH_CONFIG_DIR` contains the `cloudmesh.yaml` file. 
 
+### Commands
+
+To list the containers, pleas use
+
 ```
 $ cmsd --ps
 ```
@@ -129,34 +158,36 @@ To test if things are working, issue the command,
 $ cmsd key list 
 ```
 
-### cmsd usages 
+To stop the containers use
 
 `cmsd --stop`
 
-* stop the containers
+To start the containers use
 
 `cmsd --start`
 
-* start/restart the containers, use 
+To remove the containers use
 
 `cmsd --clean`
 
-* Clean the containers (remove stopped containers)
+To login to the container via a shell use
 
 `cmsd --shell`
 
-* Log into the running cms container 
 
 
 ### Example Usecase - Creating a vm in Chameleon Cloud 
+
+To modify the parameters use the command
 
 ```
 cmsd --gui quick
 ```
 
-```
-cmsd flavor list 
-```
+and make sure the MongoDB MODE is set to running. This is automatically
+done by the setup. Make sure you add your username, and password, as
+well as the network id and the project id and name. Test if it works with 
+
 
 ```
 cmsd flavor list --refresh
@@ -284,10 +315,6 @@ any Mongo client to explore the database by connecting to this port.
 3. Setup:
 
    ```bash
-   $ cms help
-   $ cmsd --gui profile
-   $ cmsd --gui activate
-   $ cmsd --gui mongo user
    $ cmsd --setup
    $ cmsd init
    ```
