@@ -50,6 +50,7 @@ Linux, osx:
 
 ```bash
 $ python3.8 -m venv ~/ENV3
+$ pip install pi -U
 $ source ~/ENV3/bin/activate
 $ mkdir cm   
 $ cd cm  
@@ -62,6 +63,7 @@ Windows:
 
 ```bash
 $ python -m venv ENV3
+$ pip install pi -U
 $ source \ENV3\Scripts\activate
 $ mkdir cm   
 $ cd cm  
