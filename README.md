@@ -64,7 +64,7 @@ Windows:
 ```bash
 $ python -m venv ENV3
 $ pip install pi -U
-$ source \ENV3\Scripts\activate
+$ ENV3\Scripts\activate
 $ mkdir cm   
 $ cd cm  
 $ pip install cloudmesh-installer -U 
