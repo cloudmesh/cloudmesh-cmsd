@@ -46,6 +46,8 @@ The containers are called
 
 For developers, it can be installed in an easy fashion with 
 
+Linux, osx: 
+
 ```bash
 $ python3.8 -m venv ~/ENV3
 $ source ~/ENV3/bin/activate
@@ -55,6 +57,19 @@ $ pip install cloudmesh-installer -U
 $ cloudmesh-installer git clone cmsd 
 $ cloudmesh-installer git install cmsd   
 ```
+
+Windows:
+
+```bash
+$ python -m venv ENV3
+$ source \ENV3\Scripts\activate
+$ mkdir cm   
+$ cd cm  
+$ pip install cloudmesh-installer -U 
+$ cloudmesh-installer git clone cmsd 
+$ cloudmesh-installer git install cmsd   
+```
+
 
 Now you can use the command    
 
