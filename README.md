@@ -13,6 +13,7 @@ file is created upon the first call of `cmsd` if it is not available.
 * Docker
 * Python 3.8 or newer
 * We strongly recommended using a python virtual environment
+* ssh public key in ~/.ssh/id_rsa.pub
 
 ## How to use *cmsd*
 
@@ -294,8 +295,7 @@ any Mongo client to explore the database by connecting to this port.
    * Have a sername without a space.
    * Have docker installed and accessible to the user. 
    * Have python 3.8.1 from python.org installed.
-
-   Create a key `~/.ssh/id_rsa` if you do not already have one 
+   * Create a key `~/.ssh/id_rsa` if you do not already have one 
    
    ```bash
    $ ssh-keygen
