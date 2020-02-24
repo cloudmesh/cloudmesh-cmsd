@@ -139,11 +139,21 @@ $ cmsd config cat
 
 ### cmsd usages 
 
-* To stop the containers, use `cmsd --stop`. 
-* To start/restart the containers, use `cmsd --start`. 
-* To clean the containers (remove stopped containers), use `cmsd --clean`. 
-* To log into the running `cloudmesh-cms-container`, use `cmsd --shell`. 
+`cmsd --stop`
 
+* stop the containers
+
+`cmsd --start`
+
+* start/restart the containers, use 
+
+`cmsd --start`
+
+* Clean the containers (remove stopped containers)
+
+`cmsd --clean
+
+* Log into the running 
 
 ### MongoDB and Mongo client connections  
 
