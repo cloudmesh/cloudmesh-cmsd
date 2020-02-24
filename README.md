@@ -78,7 +78,9 @@ Now you can use the command
 ```
 cms help
 ```
-Yes, the command cms help is without a d!
+Yes, the command `cms help` is without a d!
+
+From now on you use the `cmsd`
 
 ```
 cmsd --setup
