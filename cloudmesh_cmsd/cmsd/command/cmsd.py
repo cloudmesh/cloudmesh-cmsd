@@ -13,6 +13,7 @@ import textwrap
 from docopt import docopt
 
 from cloudmesh_cmsd.cmsd.__version__ import version
+from cloudmesh.common.util import path_expand
 
 DOCKERFILE = """
 FROM python:3.7-buster
@@ -70,9 +71,13 @@ cloudmesh-installer git pull aws
 cloudmesh-installer git pull azure
 """
 
-DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv("CLOUDMESH_CONFIG_DIR",
-                                         os.path.expanduser("~/.cloudmesh"))
-DEFAULT_SSH_DIR = os.path.expanduser("~/.ssh")
+DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv(
+    "CLOUDMESH_CONFIG_DIR",
+    path_expand("~/.cloudmesh")
+)
+DEFAULT_SSH_DIR = path_expand("~/.ssh")
+
+
 CMS_CONTAINER_NAME = "cloudmesh-cms"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo"
 CMS_IMAGE_NAME = "cloudmesh/cms"
@@ -333,7 +338,8 @@ class CmsdCommand:
         if len(sys.argv) == 1:
             # if arguments["COMMAND"] is None
             print("start cms interactively")
-            os.system(f"docker exec -ti {CMS_CONTAINER_NAME} /usr/local/bin/cms")
+            os.system(
+                f"docker exec -ti {CMS_CONTAINER_NAME} /usr/local/bin/cms")
             return ""
 
         elif not sys.argv[1].startswith("--"):
@@ -345,7 +351,6 @@ class CmsdCommand:
             self.cms(command)
 
             return ""
-
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
@@ -383,7 +388,8 @@ class CmsdCommand:
 
         # not implemented
         elif arguments["--pipe"]:
-            os.system(f"docker exec -i  {CMS_CONTAINER_NAME} /bin/bash -c /usr/local/bin/cms")
+            os.system(
+                f"docker exec -i  {CMS_CONTAINER_NAME} /bin/bash -c /usr/local/bin/cms")
             return ""
 
         # "cat setup.json |  docker run -i  ubuntu /bin/bash -c 'cat'"
