@@ -42,7 +42,7 @@ The containers are called
 
 
 
-## Developer Source install    
+### Developer Source install    
 
 For developers, it can be installed in an easy fashion with 
 
@@ -139,20 +139,14 @@ $ cmsd key list
 
 * start/restart the containers, use 
 
-`cmsd --start`
+`cmsd --clean`
 
 * Clean the containers (remove stopped containers)
 
-`cmsd --clean
+`cmsd --shell`
 
-* Log into the running 
+* Log into the running cms container 
 
-### MongoDB and Mongo client connections  
-
-cmsd is running an official MongoDB container from Docker Hub. Refer [here](https://hub.docker.com/_/mongo).
-
-Mongo server container is bound to `127.0.0.1:27071` port. Therefore you can use 
-any Mongo client to explore the database by connecting to this port. 
 
 ### Example Usecase - Creating a vm in Chameleon Cloud 
 
@@ -167,8 +161,6 @@ cmsd flavor list
 ```
 cmsd flavor list --refresh
 ```
-
-
 
 ### Example Usecase - Creating a vm in AWS 
 
@@ -192,6 +184,13 @@ Boot a vm with the default config
 ```
 $ cmsd vm boot 
 ```
+
+### MongoDB and Mongo client connections  
+
+cmsd is running an official MongoDB container from Docker Hub. Refer [here](https://hub.docker.com/_/mongo).
+
+Mongo server container is bound to `127.0.0.1:27071` port. Therefore you can use 
+any Mongo client to explore the database by connecting to this port. 
 
 ## Manual Page
 
