@@ -56,7 +56,7 @@ $ mkdir cm
 $ cd cm  
 $ pip install cloudmesh-installer -U 
 $ cloudmesh-installer git clone cmsd 
-$ cloudmesh-installer git install cmsd   
+$ cloudmesh-installer install cmsd   
 ```
 
 Windows:
@@ -69,7 +69,7 @@ $ mkdir cm
 $ cd cm  
 $ pip install cloudmesh-installer -U 
 $ cloudmesh-installer git clone cmsd 
-$ cloudmesh-installer git install cmsd   
+$ cloudmesh-installer install cmsd   
 ```
 
 
