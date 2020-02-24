@@ -50,8 +50,8 @@ Linux, osx:
 
 ```bash
 $ python3.8 -m venv ~/ENV3
-$ pip install pip -U
 $ source ~/ENV3/bin/activate
+$ pip install pip -U
 $ mkdir cm   
 $ cd cm  
 $ pip install cloudmesh-installer -U 
@@ -63,33 +63,13 @@ Windows:
 
 ```bash
 $ python -m venv ENV3
-$ pip install pip -U
 $ ENV3\Scripts\activate
+$ pip install pip -U
 $ mkdir cm   
 $ cd cm  
 $ pip install cloudmesh-installer -U 
 $ cloudmesh-installer git clone cmsd 
 $ cloudmesh-installer install cmsd   
-```
-
-
-Now you can use the command    
-
-```
-cms help
-```
-Yes, the command `cms help` is without a d!
-
-From now on you use the `cmsd`
-
-```
-cmsd --setup
-```
-
-The source code is contained in    
-
-```
-cloudmesh-cmsd
 ```
 
 ### cmsd setup 
@@ -137,6 +117,18 @@ properly reflected in the `cloudmesh.yaml` file.
 $ cmsd config cat
 ```
 
+Initialize cloudmesh using the following command. 
+
+```
+$ cmsd init
+```
+
+To test if things are working, issue the command,
+
+```
+$ cmsd key list 
+```
+
 ### cmsd usages 
 
 `cmsd --stop`
@@ -161,6 +153,22 @@ cmsd is running an official MongoDB container from Docker Hub. Refer [here](http
 
 Mongo server container is bound to `127.0.0.1:27071` port. Therefore you can use 
 any Mongo client to explore the database by connecting to this port. 
+
+### Example Usecase - Creating a vm in Chameleon Cloud 
+
+```
+cmsd --gui quick
+```
+
+```
+cmsd flavor list 
+```
+
+```
+cmsd flavor list --refresh
+```
+
+
 
 ### Example Usecase - Creating a vm in AWS 
 
