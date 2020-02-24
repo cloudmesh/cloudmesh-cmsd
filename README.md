@@ -265,7 +265,7 @@ $ cmsd vm boot
 3. Setup:
 
    ```bash
-   $ cmsd help
+   $ cms help
    $ cmsd --gui profile
    $ cmsd --gui activate
    $ cmsd --gui mongo user
