@@ -76,7 +76,11 @@ $ cloudmesh-installer install cmsd
 Now you can use the command    
 
 ```
-cmsd help  
+cms help
+```
+Yes, the command cms help is without a d!
+
+```
 cmsd --setup
 ```
 
