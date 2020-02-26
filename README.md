@@ -181,13 +181,13 @@ properly reflected in the `cloudmesh.yaml` file.
 $ cmsd config cat
 ```
 
-Initialize the cloudmesh database using the following command. 
+To initialize the cloudmesh database use
 
 ```
 $ cmsd init
 ```
 
-To test if things are working, issue the command,
+To test if things are working use
 
 ```
 $ cmsd key list 
@@ -195,20 +195,27 @@ $ cmsd key list
 
 To stop the containers use
 
-`cmsd --stop`
+```
+$ cmsd --stop
+```
 
 To start the containers use
 
-`cmsd --start`
+```
+$ cmsd --start
+```
 
 To remove the containers use
 
-`cmsd --clean`
+```
+$ cmsd --clean
+```
 
 To login to the container via a shell use
 
-`cmsd --shell`
-
+```
+$ cmsd --shell
+```
 
 
 ### Example Usecase - Creating a vm in Chameleon Cloud 
