@@ -275,18 +275,18 @@ use any Mongo client to explore the database by connecting to this port.
 
 ```bash
   Usage:
-        cmsd --help
-        cmsd --setup
-        cmsd --clean
-        cmsd --version
-        cmsd --update
-        cmsd --start
-        cmsd --stop
-        cmsd --ps
-        cmsd --gui COMMAND...
-        cmsd --shell
-        cmsd --pipe
-        cmsd COMMAND...
+    cmsd --help
+    cmsd --setup
+    cmsd --clean
+    cmsd --version
+    cmsd --update
+    cmsd --start
+    cmsd --stop
+    cmsd --ps
+    cmsd --gui COMMAND...
+    cmsd --shell
+    cmsd --pipe
+    cmsd COMMAND...
 
 
   This command passes the arguments to a docker container
@@ -313,12 +313,39 @@ use any Mongo client to explore the database by connecting to this port.
 
         prints out the version of cmsd and the version of the container
 
-    cmsd --gui
-        runs cloudmesh gui on the docker container
-
     cmsd --update
 
         gets a new container form dockerhub
+
+    cmsd --start
+
+        starts the mongodb
+
+    cmsd --stop
+
+        stops the mongodb
+
+    cmsd --ps
+
+        lists the container processes
+
+    cmsd --gui help
+
+        find out which gui commands are available
+
+    cmsd --gui quick
+
+        runs cloudmesh gui on the docker container
+
+    cmsd --shell
+
+        enters the cms container and starts an interactive shell
+
+    cmsd --pipe
+
+        You can pipe commands or scripts to the cmsd container
+
+            echo "banner a" | cmsd --pipe
 
     cmsd COMMAND
 
