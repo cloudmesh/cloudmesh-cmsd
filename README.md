@@ -249,19 +249,24 @@ Set the cloud to `aws`
 $ cmsd set cloud=aws 
 ```
 
-:o2: This is not checked, previous documentation was incorrect
-
-Upload the key to AWS 
 
 ```
-$ cmsd key upload KEYNAME --cloud=aws
+$ cmsd key upload --cloud=aws
 ```
 
 where the key name is specified by 
 
 ```
+cms var key
+```
+
+or
+
+```
 cms config get cloudmesh.profile.user
 ```
+
+or 
 
 Make sure you have an ssh key generated prior to booting a vm with the
 default configuration with
