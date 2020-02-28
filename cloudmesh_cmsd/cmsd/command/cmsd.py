@@ -27,7 +27,7 @@ RUN apt-get -y --no-install-recommends install \
     wget \
     sudo \
     net-tools \
-    gnupg
+    gnupg dos2unix
 
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -54,6 +54,7 @@ RUN mkdir $HOME/.cloudmesh
 RUN mkdir $HOME/.ssh
 
 COPY init.sh /
+RUN dos2unix /init.sh
 RUN chmod +x /init.sh
 
 ENTRYPOINT /bin/bash /init.sh; /bin/bash
@@ -210,10 +211,13 @@ class CmsdCommand:
             print(f"\n{CMS_CONTAINER_NAME} container running!")
         else:
             print(f"\n{CMS_CONTAINER_NAME} container not running! Starting...")
-            os.system(f"docker run -d -it "
-                      f"-v {cloudmesh_config_dir}:/root/.cloudmesh "
-                      f"-v ~/.ssh:/root/.ssh --net host "
-                      f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
+            res = os.system(f"docker run -d -it "
+                          f"-v {cloudmesh_config_dir}:/root/.cloudmesh "
+                          f"-v ~/.ssh:/root/.ssh --net host "
+                          f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
+            if res != 0:
+                print(f"\nERROR: Unable to start container {CMS_CONTAINER_NAME}! Exiting setup...")
+                return
 
         if "TBD" in _get_config_value('profile.user'):
             print(f"\nWARNING: cloudmesh profile not set!")
@@ -237,12 +241,15 @@ class CmsdCommand:
 
             _docker_exec("cms config set data.mongo.MODE=running")
 
-            os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
-                      f"-v {MONGO_VOLUME_NAME}:/data/db "
-                      f"-p 127.0.0.1:27017:27017/tcp "
-                      f"-e MONGO_INITDB_ROOT_USERNAME=admin "
-                      f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
-                      f" mongo:4.2 ")
+            res = os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
+                          f"-v {MONGO_VOLUME_NAME}:/data/db "
+                          f"-p 127.0.0.1:27017:27017/tcp "
+                          f"-e MONGO_INITDB_ROOT_USERNAME=admin "
+                          f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
+                          f" mongo:4.2 ")
+            if res != 0:
+                print(f"\nERROR: Unable to start container {MONGO_CONTAINER_NAME}! Exiting setup...")
+                return            
 
     def clean(self):
         """
