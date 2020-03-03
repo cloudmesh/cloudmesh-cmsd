@@ -16,7 +16,7 @@ from cloudmesh_cmsd.cmsd.__version__ import version
 from cloudmesh.common.util import path_expand
 
 DOCKERFILE = """
-FROM python:3.7-buster
+FROM python:3.8.2-buster
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
