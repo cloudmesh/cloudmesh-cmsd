@@ -35,6 +35,7 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | 
 RUN apt-get -y update
 RUN apt-get install -y mongodb-org-shell
 
+RUN pip install pip -U 
 RUN pip install cloudmesh-installer
 
 RUN mkdir cm
