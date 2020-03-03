@@ -27,7 +27,7 @@ RUN apt-get -y --no-install-recommends install \
     wget \
     sudo \
     net-tools \
-    gnupg
+    gnupg dos2unix
 
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -56,6 +56,7 @@ RUN mkdir $HOME/.cloudmesh
 RUN mkdir $HOME/.ssh
 
 COPY init.sh /
+RUN dos2unix /init.sh
 RUN chmod +x /init.sh
 
 ENTRYPOINT /bin/bash /init.sh; /bin/bash
@@ -78,7 +79,6 @@ DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv(
     path_expand("~/.cloudmesh")
 )
 DEFAULT_SSH_DIR = path_expand("~/.ssh")
-
 
 CMS_CONTAINER_NAME = "cloudmesh-cms"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo"
@@ -108,8 +108,19 @@ def _is_container_running(name):
     return name in output
 
 
-def _get_config_value(conf):
-    return _docker_exec(["cms", "config", "value", conf])
+def _is_container_available(name):
+    output = _run_os_command(["docker", "container", "ls", "-a",
+                              "--filter", f"name={name}",
+                              "--format", "\"{{.Names}}\""])
+
+    return name in output
+
+
+def _get_config_value(conf, docker=True):
+    if docker:
+        return _docker_exec(["cms", "config", "value", conf])
+    else:
+        return _run_os_command(["cms", "config", "value", conf])
 
 
 # you can use writefile(filename, entry) to for example write a file. make
@@ -149,7 +160,18 @@ class CmsdCommand:
         """
         starts up the containers for cms
         """
-        os.system(f"docker start {CMS_CONTAINER_NAME} {MONGO_CONTAINER_NAME}")
+        success = False
+
+        if _is_container_available(CMS_CONTAINER_NAME):
+            os.system(f"docker start {CMS_CONTAINER_NAME}")
+            success = True
+
+        if _is_container_available(MONGO_CONTAINER_NAME):
+            os.system(f"docker start {MONGO_CONTAINER_NAME}")
+            success = True
+
+        if not success:
+            print("WARN: No containers available for starting!")
 
     @staticmethod
     def ps():
@@ -163,7 +185,18 @@ class CmsdCommand:
         """
         docker-compose stop
         """
-        os.system(f"docker stop {CMS_CONTAINER_NAME} {MONGO_CONTAINER_NAME}")
+        success = False
+
+        if _is_container_running(CMS_CONTAINER_NAME):
+            os.system(f"docker stop {CMS_CONTAINER_NAME}")
+            success = True
+
+        if _is_container_running(MONGO_CONTAINER_NAME):
+            os.system(f"docker stop {MONGO_CONTAINER_NAME}")
+            success = True
+
+        if not success:
+            print("WARN: No containers available for stopping!")
 
     @staticmethod
     def shell():
@@ -212,10 +245,14 @@ class CmsdCommand:
             print(f"\n{CMS_CONTAINER_NAME} container running!")
         else:
             print(f"\n{CMS_CONTAINER_NAME} container not running! Starting...")
-            os.system(f"docker run -d -it "
-                      f"-v {cloudmesh_config_dir}:/root/.cloudmesh "
-                      f"-v ~/.ssh:/root/.ssh --net host "
-                      f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
+            res = os.system(f"docker run -d -it "
+                            f"-v {cloudmesh_config_dir}:/root/.cloudmesh "
+                            f"-v ~/.ssh:/root/.ssh --net host "
+                            f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
+            if res != 0:
+                print(f"\nERROR: Unable to start container "
+                      f"{CMS_CONTAINER_NAME}! Exiting setup...")
+                return
 
         if "TBD" in _get_config_value('profile.user'):
             print(f"\nWARNING: cloudmesh profile not set!")
@@ -239,12 +276,54 @@ class CmsdCommand:
 
             _docker_exec("cms config set data.mongo.MODE=running")
 
-            os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
-                      f"-v {MONGO_VOLUME_NAME}:/data/db "
-                      f"-p 127.0.0.1:27017:27017/tcp "
-                      f"-e MONGO_INITDB_ROOT_USERNAME=admin "
-                      f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
-                      f" mongo:4.2 ")
+            res = os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
+                            f"-v {MONGO_VOLUME_NAME}:/data/db "
+                            f"-p 127.0.0.1:27017:27017/tcp "
+                            f"-e MONGO_INITDB_ROOT_USERNAME=admin "
+                            f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
+                            f" mongo:4.2 ")
+            if res != 0:
+                print(f"\nERROR: Unable to start container "
+                      f"{MONGO_CONTAINER_NAME}! Exiting setup...")
+                return
+
+    def setup_mongo(self):
+        cloudmesh_config_dir = DEFAULT_CLOUDMESH_CONFIG_DIR
+
+        print(f"\nUsing CLOUDMESH_CONFIG_DIR={cloudmesh_config_dir}")
+        print(f"\nRunning cms help on host OS...")
+        _run_os_command(["cms", "help"])
+
+        if _is_container_running(MONGO_CONTAINER_NAME):
+            print(f"\n{MONGO_CONTAINER_NAME} container running!")
+        else:
+            print(
+                f"\n{MONGO_CONTAINER_NAME} container not running! Starting...")
+
+            mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD",
+                                         docker=False)
+
+            if "TBD" in mongo_pw:
+                print(f"\nWARNING: Mongo credentials not set!")
+                self.gui("mongo user")
+                mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD",
+                                             docker=False)
+
+            print(f"\nCreating a docker volume for mongodb...")
+            os.system(f"docker volume create {MONGO_VOLUME_NAME}")
+
+            _run_os_command("cms config set data.mongo.MODE=running".split(" "))
+
+            res = os.system(f"docker run -d --name {MONGO_CONTAINER_NAME} "
+                            f"-v {MONGO_VOLUME_NAME}:/data/db "
+                            f"-p 127.0.0.1:27017:27017/tcp "
+                            f"-e MONGO_INITDB_ROOT_USERNAME=admin "
+                            f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
+                            f" mongo:4.2 ")
+            if res != 0:
+                print(f"\nERROR: Unable to start container "
+                      f"{MONGO_CONTAINER_NAME}! Exiting setup...")
+                return
 
     def clean(self):
         """
@@ -255,11 +334,14 @@ class CmsdCommand:
         self.stop()
 
         print("\nRemoving containers...")
-        os.system(f"docker container rm {CMS_CONTAINER_NAME} "
-                  f"{MONGO_CONTAINER_NAME}")
+        if _is_container_available(CMS_CONTAINER_NAME):
+            os.system(f"docker container rm {CMS_CONTAINER_NAME}")
 
-        print("\nRemoving volumes...")
-        os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
+        if _is_container_available(MONGO_CONTAINER_NAME):
+            os.system(f"docker container rm {MONGO_CONTAINER_NAME}")
+
+            print("\nRemoving volumes...")
+            os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
 
     @staticmethod
     def version():
@@ -280,7 +362,7 @@ class CmsdCommand:
 
           Usage:
             cmsd --help
-            cmsd --setup
+            cmsd --setup [--mongo]
             cmsd --clean
             cmsd --version
             cmsd --update
@@ -305,13 +387,16 @@ class CmsdCommand:
 
                 prints this manual page
 
-            cmsd --setup
+            cmsd --setup [--mongo]
 
-                downloads the source distribution, installs the image locally
+                sets up cmsd containers.
+
+                If --mongo flag is passed, only the mongo container will be
+                setup.
 
             cmsd --clean
 
-                removes the container form docker
+                stops and removes cmsd containers
 
             cmsd --version
 
@@ -319,15 +404,15 @@ class CmsdCommand:
 
             cmsd --update
 
-                gets a new container form dockerhub
+                updates the cloudmesh repositories inside the cms-container
 
             cmsd --start
 
-                starts the mongodb
+                starts cmsd containers
 
             cmsd --stop
 
-                stops the mongodb
+                stops cmsd containers
 
             cmsd --ps
 
@@ -384,7 +469,10 @@ class CmsdCommand:
         arguments = docopt(doc, help=False)
 
         if arguments["--setup"]:
-            self.setup()
+            if arguments['--mongo']:
+                self.setup_mongo()
+            else:
+                self.setup()
 
         elif arguments["--version"]:
             print("cmsd:", version)
