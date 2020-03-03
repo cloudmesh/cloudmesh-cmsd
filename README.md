@@ -283,12 +283,35 @@ $ cmsd vm boot
 The Mongo server container is bound to `127.0.0.1:27071`. You can use
 use any Mongo client to explore the database by connecting to this port.
 
+
+### Using cmsd to spawn a mongo container/ service 
+
+You can use `cmsd` to start a mongo container as a service. 
+
+- Setup `CLOUDMESH_CONFIG_DIR` environment variable, as perviously (If not set, this would take the `~/.cloudmesh` as default)
+
+- Clean cmsd containers 
+```
+cmsd --clean 
+```
+
+- Use setup commad with `--mongo` flag 
+```
+cmsd --setup --mongo 
+```
+
+- Now you should have a mongoDB server bound to `127.0.0.1:27071` (as a container)
+
+- Starting, stopping containers would be done as mentioned in the previous section. 
+
+
 ## Manual Page
 
 ```bash
-  Usage:
+Usage:
+
     cmsd --help
-    cmsd --setup
+    cmsd --setup [--mongo]
     cmsd --clean
     cmsd --version
     cmsd --update
@@ -300,74 +323,60 @@ use any Mongo client to explore the database by connecting to this port.
     cmsd --pipe
     cmsd COMMAND...
 
-
   This command passes the arguments to a docker container
   that runs cloudmesh.
 
   Arguments:
       COMMAND the commands we bass along
-
+  
   Description:
-
+  
     cmsd --help
-
         prints this manual page
-
-    cmsd --setup
-
-        downloads the source distribution, installs the image locally
-
+  
+    cmsd --setup [--mongo]
+        sets up cmsd containers.
+        If --mongo flag is passed, only the mongo container will be
+        setup.
+  
     cmsd --clean
-
-        removes the container form docker
-
+        stops and removes cmsd containers
+  
     cmsd --version
-
         prints out the version of cmsd and the version of the container
-
+  
     cmsd --update
-
-        gets a new container form dockerhub
-
+        updates the cloudmesh repositories inside the cms-container
+  
     cmsd --start
-
-        starts the mongodb
-
+        starts cmsd containers
+  
     cmsd --stop
-
-        stops the mongodb
-
+        stops cmsd containers
+  
     cmsd --ps
-
         lists the container processes
-
+  
     cmsd --gui help
-
         find out which gui commands are available
-
+    
     cmsd --gui quick
-
         runs cloudmesh gui on the docker container
-
+    
     cmsd --shell
-
         enters the cms container and starts an interactive shell
-
+    
     cmsd --pipe
-
         You can pipe commands or scripts to the cmsd container
-
             echo "banner a" | cmsd --pipe
-
+    
     cmsd COMMAND
-
         The command will be executed within the container, just as in
         case of cms.
-
+    
     cmsd
-
         When no command is specified, cmsd will be run in interactive
-        mode.
+        mode. 
 ```
 
 ## Quickstart
