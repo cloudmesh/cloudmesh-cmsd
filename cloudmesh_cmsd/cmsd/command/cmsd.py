@@ -45,9 +45,11 @@ WORKDIR cm
 
 # RUN cloudmesh-installer get cms
 # RUN cloudmesh-installer get cloud
-RUN cloudmesh-installer get openstack
-RUN cloudmesh-installer get aws
-RUN cloudmesh-installer get azure
+# RUN cloudmesh-installer get openstack
+# RUN cloudmesh-installer get aws
+# RUN cloudmesh-installer get azure
+
+RUN cloudmesh-installer get cms cloud openstack aws azure
 
 RUN mkdir $HOME/.cloudmesh
 RUN mkdir $HOME/.ssh
@@ -70,6 +72,7 @@ cloudmesh-installer git pull cms
 cloudmesh-installer git pull cloud
 cloudmesh-installer git pull aws
 cloudmesh-installer git pull azure
+cloudmesh-installer git pull openstack
 """
 
 DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv(
@@ -111,6 +114,10 @@ def _is_container_available(name):
                               "--filter", f"name={name}",
                               "--format", "\"{{.Names}}\""])
 
+    return name in output
+
+def _is_image_available(name):
+    output = _run_os_command(["docker", "image", "ls"])
     return name in output
 
 
@@ -169,7 +176,7 @@ class CmsdCommand:
             success = True
 
         if not success:
-            print("WARN: No containers available for starting!")
+            print("WARNING: No containers available for starting!")
 
     @staticmethod
     def ps():
@@ -194,7 +201,7 @@ class CmsdCommand:
             success = True
 
         if not success:
-            print("WARN: No containers available for stopping!")
+            print("WARNING: No containers available for stopping!")
 
     @staticmethod
     def shell():
@@ -340,6 +347,10 @@ class CmsdCommand:
 
             print("\nRemoving volumes ...")
             os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
+
+        if _is_image_available(CMS_IMAGE_NAME):
+            print("\nRemoving images ...")
+            os.system(f"docker image rm {CMS_IMAGE_NAME}")
 
     @staticmethod
     def version():
