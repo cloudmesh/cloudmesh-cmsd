@@ -14,6 +14,7 @@ from docopt import docopt
 
 from cloudmesh_cmsd.cmsd.__version__ import version
 from cloudmesh.common.util import path_expand
+from cloudmesh.common.StopWatch import StopWatch
 
 DOCKERFILE = """
 FROM python:3.8.2-buster
@@ -35,7 +36,11 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | 
 RUN apt-get -y update
 RUN apt-get install -y mongodb-org-shell
 
-# CMD export DISPLAY =":0"
+
+#
+# the display setting does not work
+#
+# CMD export DISPLAY =":0.0"
 
 RUN pip install pip -U 
 RUN pip install cloudmesh-installer
@@ -65,6 +70,7 @@ cloudmesh-installer git pull cms
 cloudmesh-installer git pull cloud
 cloudmesh-installer git pull aws
 cloudmesh-installer git pull azure
+cloudmesh-installer git pull openstack
 """
 
 DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv(
@@ -107,6 +113,10 @@ def _is_container_available(name):
                               "--filter", f"name={name}",
                               "--format", "\"{{.Names}}\""])
 
+    return name in output
+
+def _is_image_available(name):
+    output = _run_os_command(["docker", "image", "ls"])
     return name in output
 
 
@@ -171,7 +181,7 @@ class CmsdCommand:
             success = True
 
         if not success:
-            print("WARN: No containers available for starting!")
+            print("WARNING: No containers available for starting!")
 
     @staticmethod
     def ps():
@@ -196,7 +206,7 @@ class CmsdCommand:
             success = True
 
         if not success:
-            print("WARN: No containers available for stopping!")
+            print("WARNING: No containers available for stopping!")
 
     @staticmethod
     def shell():
@@ -348,6 +358,10 @@ class CmsdCommand:
             if _is_image_available(MONGO_IMAGE):
                 os.system(f"docker image rm {MONGO_IMAGE}")
 
+        if _is_image_available(CMS_IMAGE_NAME):
+            print("\nRemoving images ...")
+            os.system(f"docker image rm {CMS_IMAGE_NAME}")
+
     @staticmethod
     def version():
         os.system("docker images | fgrep cmsd_cloudmesh")
@@ -456,6 +470,9 @@ class CmsdCommand:
 
         """
 
+        StopWatch.start("run")
+
+
         if len(sys.argv) == 1:
             # if arguments["COMMAND"] is None
             print("start cms interactively")
@@ -476,7 +493,9 @@ class CmsdCommand:
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
 
+
         if arguments["--setup"]:
+
             if arguments['--mongo']:
                 self.setup_mongo()
             else:
@@ -517,9 +536,15 @@ class CmsdCommand:
             return ""
 
         # "cat setup.json |  docker run -i  ubuntu /bin/bash -c 'cat'"
-
         else:
             print(doc)
+
+        StopWatch.stop("run")
+        print()
+        StopWatch.print("Run time", "run")
+        print()
+
+
 
         return ""
 
