@@ -35,7 +35,7 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | 
 RUN apt-get -y update
 RUN apt-get install -y mongodb-org-shell
 
-CMD export DISPLAY =":0"
+# CMD export DISPLAY =":0"
 
 RUN pip install pip -U 
 RUN pip install cloudmesh-installer
@@ -55,7 +55,6 @@ RUN mkdir $HOME/.ssh
 COPY init.sh /
 RUN dos2unix /init.sh
 RUN chmod +x /init.sh
-
 
 ENTRYPOINT /bin/bash /init.sh; /bin/bash
 
@@ -81,6 +80,7 @@ DEFAULT_SSH_DIR = path_expand("~/.ssh")
 CMS_CONTAINER_NAME = "cloudmesh-cms"
 MONGO_CONTAINER_NAME = "cloudmesh-mongo"
 CMS_IMAGE_NAME = "cloudmesh/cms"
+MONGO_IMAGE = "mongo:4.2"
 MONGO_VOLUME_NAME = "cloudmesh-mongo-vol"
 
 
@@ -112,6 +112,12 @@ def _is_container_available(name):
                               "--format", "\"{{.Names}}\""])
 
     return name in output
+
+
+def _is_image_available(name):
+    output = _run_os_command(["docker", "images", "--format",
+                              "\"{{lower .Repository}}\"", name])
+    return name.split(":")[0] in output
 
 
 def _get_config_value(conf, docker=True):
@@ -218,10 +224,7 @@ class CmsdCommand:
         if not os.path.exists(cloudmesh_config_dir):
             os.mkdir(cloudmesh_config_dir)
 
-        output = _run_os_command(["docker", "images", "--format",
-                                  "\"{{lower .Repository}}\"", CMS_IMAGE_NAME])
-
-        if CMS_IMAGE_NAME in output:
+        if _is_image_available(CMS_IMAGE_NAME):
             print(f"\n{CMS_IMAGE_NAME} image available!")
         else:
             print(f"\n{CMS_IMAGE_NAME} image not found! Building...")
@@ -279,7 +282,7 @@ class CmsdCommand:
                             f"-p 127.0.0.1:27017:27017/tcp "
                             f"-e MONGO_INITDB_ROOT_USERNAME=admin "
                             f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
-                            f" mongo:4.2 ")
+                            f" {MONGO_IMAGE} ")
             if res != 0:
                 print(f"\nERROR: Unable to start container "
                       f"{MONGO_CONTAINER_NAME}! Exiting setup...")
@@ -323,7 +326,7 @@ class CmsdCommand:
                       f"{MONGO_CONTAINER_NAME}! Exiting setup...")
                 return
 
-    def clean(self):
+    def clean(self, force=None):
         """
         remove the ~/.cloudmesh/cmsd dir
         :return:
@@ -340,6 +343,14 @@ class CmsdCommand:
 
             print("\nRemoving volumes ...")
             os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
+            
+        if force:
+            print("\nRemoving images ...")
+            if _is_image_available(CMS_IMAGE_NAME):
+                os.system(f"docker image rm {CMS_IMAGE_NAME}")
+                
+            if _is_image_available(MONGO_IMAGE):
+                os.system(f"docker image rm {MONGO_IMAGE}")
 
     @staticmethod
     def version():
@@ -361,7 +372,7 @@ class CmsdCommand:
           Usage:
             cmsd --help
             cmsd --setup [--mongo]
-            cmsd --clean
+            cmsd --clean [--force]
             cmsd --version
             cmsd --update
             cmsd --start
@@ -392,9 +403,12 @@ class CmsdCommand:
                 If --mongo flag is passed, only the mongo container will be
                 setup.
 
-            cmsd --clean
+            cmsd --clean [--force]
 
                 stops and removes cmsd containers
+
+                If --clean flag is passed, container images will also be
+                removed.
 
             cmsd --version
 
@@ -477,7 +491,7 @@ class CmsdCommand:
             self.version()
 
         elif arguments["--clean"]:
-            self.clean()
+            self.clean(arguments['--force'])
 
         elif arguments['--help']:
             print(doc)

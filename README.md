@@ -309,10 +309,9 @@ cmsd --setup --mongo
 
 ```bash
 Usage:
-
     cmsd --help
     cmsd --setup [--mongo]
-    cmsd --clean
+    cmsd --clean [--force]
     cmsd --version
     cmsd --update
     cmsd --start
@@ -328,55 +327,73 @@ Usage:
 
   Arguments:
       COMMAND the commands we bass along
-  
-  Description:
-  
+    
+    Description:
+    
     cmsd --help
+    
         prints this manual page
-  
+    
     cmsd --setup [--mongo]
+    
         sets up cmsd containers.
+    
         If --mongo flag is passed, only the mongo container will be
         setup.
-  
-    cmsd --clean
+    
+    cmsd --clean [--force]
+    
         stops and removes cmsd containers
-  
+    
+        If --clean flag is passed, container images will also be removed.
+    
     cmsd --version
+    
         prints out the version of cmsd and the version of the container
-  
+    
     cmsd --update
+    
         updates the cloudmesh repositories inside the cms-container
-  
+    
     cmsd --start
+    
         starts cmsd containers
-  
+    
     cmsd --stop
+    
         stops cmsd containers
-  
+    
     cmsd --ps
+    
         lists the container processes
-  
+    
     cmsd --gui help
+    
         find out which gui commands are available
     
     cmsd --gui quick
+    
         runs cloudmesh gui on the docker container
     
     cmsd --shell
+    
         enters the cms container and starts an interactive shell
     
     cmsd --pipe
+    
         You can pipe commands or scripts to the cmsd container
+    
             echo "banner a" | cmsd --pipe
     
     cmsd COMMAND
+    
         The command will be executed within the container, just as in
         case of cms.
     
     cmsd
+    
         When no command is specified, cmsd will be run in interactive
-        mode. 
+        mode.
 ```
 
 ## Quickstart
