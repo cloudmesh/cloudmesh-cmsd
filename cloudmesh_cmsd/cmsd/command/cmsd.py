@@ -43,17 +43,7 @@ RUN pip install cloudmesh-installer
 RUN mkdir cm
 WORKDIR cm
 
-RUN cloudmesh-installer git clone cms
-RUN cloudmesh-installer git clone cloud
-RUN cloudmesh-installer git clone openstack
-RUN cloudmesh-installer git clone aws
-RUN cloudmesh-installer git clone azure
-
-RUN cloudmesh-installer install cms
-RUN cloudmesh-installer install cloud
-RUN cloudmesh-installer install openstack
-RUN cloudmesh-installer install azure
-RUN cloudmesh-installer install aws
+RUN cloudmesh-installer get cms cloud openstack aws azure
 
 RUN mkdir $HOME/.cloudmesh
 RUN mkdir $HOME/.ssh
