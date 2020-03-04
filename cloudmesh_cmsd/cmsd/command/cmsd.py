@@ -35,23 +35,19 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | 
 RUN apt-get -y update
 RUN apt-get install -y mongodb-org-shell
 
+CMD export DISPLAY =":0"
+
 RUN pip install pip -U 
 RUN pip install cloudmesh-installer
 
 RUN mkdir cm
 WORKDIR cm
 
-RUN cloudmesh-installer git clone cms
-RUN cloudmesh-installer git clone cloud
-RUN cloudmesh-installer git clone aws
-RUN cloudmesh-installer git clone azure
-RUN cloudmesh-installer git clone openstack
-
-RUN cloudmesh-installer install cms
-RUN cloudmesh-installer install cloud
-RUN cloudmesh-installer install azure
-RUN cloudmesh-installer install aws
-RUN cloudmesh-installer install openstack
+# RUN cloudmesh-installer get clone cms
+# RUN cloudmesh-installer get clone cloud
+RUN cloudmesh-installer get clone openstack
+RUN cloudmesh-installer get clone aws
+RUN cloudmesh-installer get clone azure
 
 RUN mkdir $HOME/.cloudmesh
 RUN mkdir $HOME/.ssh
@@ -59,6 +55,7 @@ RUN mkdir $HOME/.ssh
 COPY init.sh /
 RUN dos2unix /init.sh
 RUN chmod +x /init.sh
+
 
 ENTRYPOINT /bin/bash /init.sh; /bin/bash
 
