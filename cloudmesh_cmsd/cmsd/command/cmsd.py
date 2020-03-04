@@ -14,6 +14,7 @@ from docopt import docopt
 
 from cloudmesh_cmsd.cmsd.__version__ import version
 from cloudmesh.common.util import path_expand
+from cloudmesh.common.StopWatch import StopWatch
 
 DOCKERFILE = """
 FROM python:3.8.2-buster
@@ -35,7 +36,10 @@ RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | 
 RUN apt-get -y update
 RUN apt-get install -y mongodb-org-shell
 
-CMD export DISPLAY =":0"
+#
+# the display setting does not work
+#
+CMD export DISPLAY =":0.0"
 
 RUN pip install pip -U 
 RUN pip install cloudmesh-installer
@@ -457,6 +461,9 @@ class CmsdCommand:
 
         """
 
+        StopWatch.start("run")
+
+
         if len(sys.argv) == 1:
             # if arguments["COMMAND"] is None
             print("start cms interactively")
@@ -477,7 +484,9 @@ class CmsdCommand:
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
 
+
         if arguments["--setup"]:
+
             if arguments['--mongo']:
                 self.setup_mongo()
             else:
@@ -518,9 +527,15 @@ class CmsdCommand:
             return ""
 
         # "cat setup.json |  docker run -i  ubuntu /bin/bash -c 'cat'"
-
         else:
             print(doc)
+
+        StopWatch.stop("run")
+        print()
+        StopWatch.print("Run time", "run")
+        print()
+
+
 
         return ""
 
