@@ -43,11 +43,11 @@ RUN pip install cloudmesh-installer
 RUN mkdir cm
 WORKDIR cm
 
-# RUN cloudmesh-installer get clone cms
-# RUN cloudmesh-installer get clone cloud
-RUN cloudmesh-installer get clone openstack
-RUN cloudmesh-installer get clone aws
-RUN cloudmesh-installer get clone azure
+# RUN cloudmesh-installer get cms
+# RUN cloudmesh-installer get cloud
+RUN cloudmesh-installer get openstack
+RUN cloudmesh-installer get aws
+RUN cloudmesh-installer get azure
 
 RUN mkdir $HOME/.cloudmesh
 RUN mkdir $HOME/.ssh
@@ -328,17 +328,17 @@ class CmsdCommand:
         remove the ~/.cloudmesh/cmsd dir
         :return:
         """
-        print("\nStopping containers...")
+        print("\nStopping containers ...")
         self.stop()
 
-        print("\nRemoving containers...")
+        print("\nRemoving containers ...")
         if _is_container_available(CMS_CONTAINER_NAME):
             os.system(f"docker container rm {CMS_CONTAINER_NAME}")
 
         if _is_container_available(MONGO_CONTAINER_NAME):
             os.system(f"docker container rm {MONGO_CONTAINER_NAME}")
 
-            print("\nRemoving volumes...")
+            print("\nRemoving volumes ...")
             os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
 
     @staticmethod
