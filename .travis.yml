@@ -18,7 +18,7 @@ services:
 install:
   - python --version
   - pip install pip -U
-  - pip install cryptography --no-binary
+  - pip install --no-binary cryptography
   - pip install -r requirements.txt
   - pip install .
   - pwd
