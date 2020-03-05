@@ -61,6 +61,10 @@ setup(
     license="Apache 2.0",
     url=URL,
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "": ["Dockerfile", "init.sh"],
+    },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",

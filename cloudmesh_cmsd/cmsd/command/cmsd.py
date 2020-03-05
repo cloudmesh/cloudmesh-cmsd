@@ -66,7 +66,15 @@ ENTRYPOINT /bin/bash /init.sh; /bin/bash
 INIT_SH = """
 #!/bin/bash
 
-cloudmesh-installer get cms cloud openstack aws azure 
+pip install cloudmesh-installer -U
+
+cloudmesh-installer git pull cms cloud openstack aws azure 
+
+# cloudmesh-installer git pull cms
+# cloudmesh-installer git pull cloud
+# cloudmesh-installer git pull aws
+# cloudmesh-installer git pull azure
+# cloudmesh-installer git pull openstack
 
 """
 
