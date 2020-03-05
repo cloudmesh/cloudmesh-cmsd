@@ -66,11 +66,8 @@ ENTRYPOINT /bin/bash /init.sh; /bin/bash
 INIT_SH = """
 #!/bin/bash
 
-cloudmesh-installer git pull cms
-cloudmesh-installer git pull cloud
-cloudmesh-installer git pull aws
-cloudmesh-installer git pull azure
-cloudmesh-installer git pull openstack
+cloudmesh-installer get cms cloud openstack aws azure 
+
 """
 
 DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv(
