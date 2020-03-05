@@ -21,11 +21,11 @@ class TestCmsd:
         HEADING()
 
         Benchmark.Start()
-        result = Shell.execute("cmsd --help", shell=True)
+        result = Shell.execute("cmsd --setup", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
-        assert  "cmsd --setup" in result
+        assert  "cloudmesh-mongo container running!" in result
         Benchmark.Status(True)
 
     def test_version(self):
@@ -38,7 +38,7 @@ class TestCmsd:
         VERBOSE(result)
 
         msg = f"cmsd: {version}"
-        print ("Version string to e tested:", msg)
+        print ("Version string to be tested:", msg)
         assert  msg in result
         Benchmark.Status(True)
 
@@ -54,29 +54,6 @@ class TestCmsd:
         assert "clear" in result
         Benchmark.Status(True)
 
-    def exclude_test_setup(self):
-        HEADING()
-        Benchmark.Start()
-        result = Shell.execute("cmsd --setup", shell=True)
-        Benchmark.Stop()
-        VERBOSE(result)
-        raise NotImplementedError
-        assert "not implemented" in result
-        Benchmark.Status(True)
-
-
-    def exclude_test_clean(self):
-        HEADING()
-        Benchmark.Start()
-        result = Shell.execute("cmsd --clean", shell=True)
-        Benchmark.Stop()
-        VERBOSE(result)
-        raise NotImplementedError
-
-        assert "not implemented" in result
-        Benchmark.Status(True)
-
-
     def test_banner_hello(self):
         HEADING()
         Benchmark.Start()
@@ -87,6 +64,7 @@ class TestCmsd:
         assert "# hello" in result
         Benchmark.Status(True)
 
+    """
     def test_vm_list_json_refresh(self):
         HEADING()
         Benchmark.Start()
@@ -97,7 +75,6 @@ class TestCmsd:
         assert result.endswith("}")
         Benchmark.Status(True)
 
-
     def test_vm_list_json(self):
         HEADING()
         Benchmark.Start()
@@ -107,7 +84,18 @@ class TestCmsd:
 
         assert result.endswith("}")
         Benchmark.Status(True)
+    """
 
+    def exclude_test_clean(self):
+        HEADING()
+        Benchmark.Start()
+        result = Shell.execute("cmsd --clean", shell=True)
+        Benchmark.Stop()
+        VERBOSE(result)
+
+        assert "Removing volumes ..." in result
+        assert "Removing temp dir" in result
+        Benchmark.Status(True)
 
 
     def test_benchmark(self):
