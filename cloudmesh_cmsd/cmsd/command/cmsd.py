@@ -294,15 +294,18 @@ class CmsdCommand:
 
         if image:
             print("\nRemoving images ...")
-            if _is_image_available(CMS_IMAGE_NAME):
-                os.system(f"docker image rm {CMS_IMAGE_NAME}")
+            for image in [CMS_IMAGE_NAME, MONGO_IMAGE]:
+                print (f"    deleting image {image}")
+                if _is_image_available(image):
+                    command = f"docker rmi {image}"
+                    print (f"        {command}")
+                    os.system(command)
 
-            if _is_image_available(MONGO_IMAGE):
-                os.system(f"docker image rm {MONGO_IMAGE}")
 
             if os.path.exists(TEMP_DIR):
                 print("\nRemoving temp dir ...")
                 shutil.rmtree(TEMP_DIR)
+
 
     @staticmethod
     def version():
