@@ -12,12 +12,14 @@ services:
 
 install:
   - python --version
-  - python3 -m venv ~/ENV3
+  - python3.8.1 -m venv ~/ENV3
   - source ~/ENV3/bin/activate
-  - pip3 install pip3 -U
+  - python --version
+  - which python
+  - ~/ENV3/bin/pip install pip -U
+  - ~/ENV3/bin/pip install -r requirements.txt
+  - ~/ENV3/bin/pip install .
   - pwd
-  - pip3 install -r requirements.txt
-  - pip3 install .
   - cmsd --setup
   - cmsd help
 
