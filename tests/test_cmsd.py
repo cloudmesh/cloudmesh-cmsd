@@ -17,8 +17,11 @@ Benchmark.debug()
 @pytest.mark.incremental
 class TestCmsd:
 
-    def test_help(self):
+    def test_setup(self):
         HEADING()
+
+        print("WARNING: this will take quite a while ...")
+        print()
 
         Benchmark.Start()
         result = Shell.execute("cmsd --setup", shell=True)
