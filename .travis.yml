@@ -1,24 +1,25 @@
-dist: bionic
+os:
+  - linux
+
+arch: arm64
 
 sudo: required
 
-language: python
-
 python:
   - "3.8"
+
+dist: bionic
+
+language: python
 
 services:
   - docker
 
 install:
   - python --version
-  - python3.8 -m venv ~/ENV3
-  - source ~/ENV3/bin/activate
-  - python --version
-  - which python
-  - ~/ENV3/bin/pip install pip -U
-  - ~/ENV3/bin/pip install -r requirements.txt
-  - ~/ENV3/bin/pip install .
+  - pip install pip -U
+  - pip install -r requirements.txt
+  - pip install .
   - pwd
   - cmsd --setup
   - cmsd help
