@@ -275,7 +275,7 @@ class CmsdCommand:
                       f"{MONGO_CONTAINER_NAME}! Exiting setup...")
                 return
 
-    def clean(self, image=None):
+    def clean(self, force=None):
         """
         remove the ~/.cloudmesh/cmsd dir
         :return:
@@ -294,7 +294,7 @@ class CmsdCommand:
             print("\nRemoving volumes ...")
             os.system(f"docker volume rm {MONGO_VOLUME_NAME} --force")
 
-        if image:
+        if force:
             print("\nRemoving images ...")
             for image in [CMS_IMAGE_NAME, MONGO_IMAGE]:
                 print (f"    deleting image {image}")
@@ -305,7 +305,7 @@ class CmsdCommand:
 
 
             if os.path.exists(TEMP_DIR):
-                print("\nRemoving temp dir ...")
+                print(f"\nRemoving temp dir {TEMP_DIR} ...")
                 shutil.rmtree(TEMP_DIR)
 
 
@@ -329,7 +329,7 @@ class CmsdCommand:
           Usage:
             cmsd --help
             cmsd --setup [--mongo]
-            cmsd --clean [--image]
+            cmsd --clean [--force]
             cmsd --version
             cmsd --update
             cmsd --start
@@ -360,7 +360,7 @@ class CmsdCommand:
                 If --mongo flag is passed, only the mongo container will be
                 setup.
 
-            cmsd --clean [--image]
+            cmsd --clean [--force]
 
                 stops and removes cmsd containers
 
@@ -451,7 +451,7 @@ class CmsdCommand:
             self.version()
 
         elif arguments["--clean"]:
-            self.clean(image=arguments['--image'])
+            self.clean(force=arguments['--force'])
 
         elif arguments['--help']:
             print(doc)
