@@ -12,6 +12,9 @@ services:
 
 install:
   - python --version
+  - python -m venv ~/ENV3
+  - source ~/ENV3/bin/activate
+  - pip install pip -U
   - pwd
   - pip install -r requirements.txt
   - pip install .
