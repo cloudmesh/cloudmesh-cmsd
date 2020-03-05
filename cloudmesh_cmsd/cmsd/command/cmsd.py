@@ -10,73 +10,12 @@ import subprocess
 import sys
 import textwrap
 
+import pkg_resources
 from docopt import docopt
 
 from cloudmesh_cmsd.cmsd.__version__ import version
 from cloudmesh.common.util import path_expand
 from cloudmesh.common.StopWatch import StopWatch
-
-DOCKERFILE = """
-FROM python:3.8.2-buster
-
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN apt-get -y --no-install-recommends install \
-    build-essential \
-    git \
-    curl \
-    wget \
-    sudo \
-    net-tools \
-    gnupg dos2unix
-
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
-RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
-
-RUN apt-get -y update
-RUN apt-get install -y mongodb-org-shell
-
-
-#
-# the display setting does not work
-#
-# CMD export DISPLAY =":0.0"
-
-RUN pip install pip -U 
-RUN pip install cloudmesh-installer
-
-RUN mkdir cm
-WORKDIR cm
-
-RUN cloudmesh-installer get cms cloud openstack aws azure
-
-RUN mkdir $HOME/.cloudmesh
-RUN mkdir $HOME/.ssh
-
-COPY init.sh /
-RUN dos2unix /init.sh
-RUN chmod +x /init.sh
-
-ENTRYPOINT /bin/bash /init.sh; /bin/bash
-
-#docker run --rm -d -v /aux/github/cm/docker/mongo_data:/data/db -p 127.0.0.1:27017:27017/tcp --name mongos mongo:4.2
-#docker run --rm -it -v /aux/github/cm/docker/cloudmesh_home:/root/.cloudmesh -v ~/.ssh:/root/.ssh --net host --name cms-container cloudmesh-cms
-"""
-
-INIT_SH = """
-#!/bin/bash
-
-pip install cloudmesh-installer -U
-
-cloudmesh-installer git pull cms cloud openstack aws azure 
-
-# cloudmesh-installer git pull cms
-# cloudmesh-installer git pull cloud
-# cloudmesh-installer git pull aws
-# cloudmesh-installer git pull azure
-# cloudmesh-installer git pull openstack
-
-"""
 
 DEFAULT_CLOUDMESH_CONFIG_DIR = os.getenv(
     "CLOUDMESH_CONFIG_DIR",
@@ -89,6 +28,8 @@ MONGO_CONTAINER_NAME = "cloudmesh-mongo"
 CMS_IMAGE_NAME = "cloudmesh/cms"
 MONGO_IMAGE = "mongo:4.2"
 MONGO_VOLUME_NAME = "cloudmesh-mongo-vol"
+
+TEMP_DIR = DEFAULT_CLOUDMESH_CONFIG_DIR + '/__dockerfile'
 
 
 def _run_os_command(cmd_str):
@@ -118,10 +59,6 @@ def _is_container_available(name):
                               "--filter", f"name={name}",
                               "--format", "\"{{.Names}}\""])
 
-    return name in output
-
-def _is_image_available(name):
-    output = _run_os_command(["docker", "image", "ls"])
     return name in output
 
 
@@ -240,18 +177,18 @@ class CmsdCommand:
         else:
             print(f"\n{CMS_IMAGE_NAME} image not found! Building...")
 
-            temp_dir = cloudmesh_config_dir + '/temp'
-            os.mkdir(temp_dir)
+            if not os.path.exists(TEMP_DIR):
+                os.mkdir(TEMP_DIR)
 
-            with open(temp_dir + '/Dockerfile', 'w') as f:
-                f.write(DOCKERFILE)
+            fpath = pkg_resources.resource_filename(__name__, '/Dockerfile')
+            print(f"Using Dockerfile: {fpath}")
+            shutil.copyfile(fpath, TEMP_DIR + '/Dockerfile')
 
-            with open(temp_dir + '/init.sh', 'w') as f:
-                f.write(INIT_SH)
+            fpath = pkg_resources.resource_filename(__name__, '/init.sh')
+            print(f"Using init.sh: {fpath}")
+            shutil.copyfile(fpath, TEMP_DIR + '/init.sh')
 
-            os.system(f"docker build -t {CMS_IMAGE_NAME} {temp_dir}")
-
-            shutil.rmtree(temp_dir)
+            os.system(f"docker build -t {CMS_IMAGE_NAME} {TEMP_DIR}")
 
         if _is_container_running(CMS_CONTAINER_NAME):
             print(f"\n{CMS_CONTAINER_NAME} container running!")
@@ -354,18 +291,18 @@ class CmsdCommand:
 
             print("\nRemoving volumes ...")
             os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
-            
+
         if force:
             print("\nRemoving images ...")
             if _is_image_available(CMS_IMAGE_NAME):
                 os.system(f"docker image rm {CMS_IMAGE_NAME}")
-                
+
             if _is_image_available(MONGO_IMAGE):
                 os.system(f"docker image rm {MONGO_IMAGE}")
 
-        if _is_image_available(CMS_IMAGE_NAME):
-            print("\nRemoving images ...")
-            os.system(f"docker image rm {CMS_IMAGE_NAME}")
+            if os.path.exists(TEMP_DIR):
+                print("\nRemoving temp dir ...")
+                shutil.rmtree(TEMP_DIR)
 
     @staticmethod
     def version():
@@ -477,7 +414,6 @@ class CmsdCommand:
 
         StopWatch.start("run")
 
-
         if len(sys.argv) == 1:
             # if arguments["COMMAND"] is None
             print("start cms interactively")
@@ -497,7 +433,6 @@ class CmsdCommand:
 
         doc = textwrap.dedent(self.do_cmsd.__doc__)
         arguments = docopt(doc, help=False)
-
 
         if arguments["--setup"]:
 
@@ -548,8 +483,6 @@ class CmsdCommand:
         print()
         StopWatch.print("Run time", "run")
         print()
-
-
 
         return ""
 
