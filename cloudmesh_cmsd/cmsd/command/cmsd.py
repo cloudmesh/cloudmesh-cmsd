@@ -123,7 +123,7 @@ class CmsdCommand:
             success = True
 
         if not success:
-            print("WARNING: No containers available for starting!")
+            print("\n    WARNING: No containers available for starting!")
 
     @staticmethod
     def ps():
@@ -148,7 +148,7 @@ class CmsdCommand:
             success = True
 
         if not success:
-            print("WARNING: No containers available for stopping!")
+            print("\n    WARNING: No containers available for stopping!")
 
     @staticmethod
     def shell():
@@ -168,6 +168,7 @@ class CmsdCommand:
         print(f"\nUsing CLOUDMESH_CONFIG_DIR={cloudmesh_config_dir}")
         print(f"\nRunning cms help on host OS...")
         _run_os_command(["cms", "help"])
+        _run_os_command(["cms", "debug", "off"])
 
         if not os.path.exists(cloudmesh_config_dir):
             os.mkdir(cloudmesh_config_dir)
@@ -199,12 +200,12 @@ class CmsdCommand:
                             f"-v ~/.ssh:/root/.ssh --net host "
                             f"--name {CMS_CONTAINER_NAME} {CMS_IMAGE_NAME}")
             if res != 0:
-                print(f"\nERROR: Unable to start container "
+                print(f"\n    ERROR: Unable to start container "
                       f"{CMS_CONTAINER_NAME}! Exiting setup...")
                 return
 
         if "TBD" in _get_config_value('profile.user'):
-            print(f"\nWARNING: cloudmesh profile not set!")
+            print(f"\n    WARNING: cloudmesh profile not set!")
             self.gui("profile")
 
         if _is_container_running(MONGO_CONTAINER_NAME):
@@ -216,7 +217,7 @@ class CmsdCommand:
             mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD")
 
             if "TBD" in mongo_pw:
-                print(f"\nWARNING: Mongo credentials not set!")
+                print(f"\n    WARNING: Mongo credentials not set!")
                 self.gui("mongo user")
                 mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD")
 
@@ -232,7 +233,7 @@ class CmsdCommand:
                             f"-e MONGO_INITDB_ROOT_PASSWORD={mongo_pw} "
                             f" {MONGO_IMAGE} ")
             if res != 0:
-                print(f"\nERROR: Unable to start container "
+                print(f"\n    ERROR: Unable to start container "
                       f"{MONGO_CONTAINER_NAME}! Exiting setup...")
                 return
 
@@ -253,7 +254,7 @@ class CmsdCommand:
                                          docker=False)
 
             if "TBD" in mongo_pw:
-                print(f"\nWARNING: Mongo credentials not set!")
+                print(f"\n    WARNING: Mongo credentials not set!")
                 self.gui("mongo user")
                 mongo_pw = _get_config_value("data.mongo.MONGO_PASSWORD",
                                              docker=False)
@@ -283,21 +284,22 @@ class CmsdCommand:
         self.stop()
 
         print("\nRemoving containers ...")
+
         if _is_container_available(CMS_CONTAINER_NAME):
-            os.system(f"docker container rm {CMS_CONTAINER_NAME}")
+            os.system(f"docker container rm {CMS_CONTAINER_NAME}  --force")
 
         if _is_container_available(MONGO_CONTAINER_NAME):
-            os.system(f"docker container rm {MONGO_CONTAINER_NAME}")
+            os.system(f"docker container rm {MONGO_CONTAINER_NAME} --force")
 
             print("\nRemoving volumes ...")
-            os.system(f"docker volume rm {MONGO_VOLUME_NAME}")
+            os.system(f"docker volume rm {MONGO_VOLUME_NAME} --force")
 
         if image:
             print("\nRemoving images ...")
             for image in [CMS_IMAGE_NAME, MONGO_IMAGE]:
                 print (f"    deleting image {image}")
                 if _is_image_available(image):
-                    command = f"docker rmi {image}"
+                    command = f"docker rmi {image} --force"
                     print (f"        {command}")
                     os.system(command)
 
