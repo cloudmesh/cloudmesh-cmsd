@@ -28,8 +28,8 @@ install:
   - which python
   - which pip
   - sudo pip install cryptography --no-binary cryptography
-#  - sudo pip install cryptography==2.5
   - sudo pip install -r requirements.txt
+  - sudo pip install -r requirements-dev.txt
   - sudo pip install .
   - pwd
   - cmsd --setup
