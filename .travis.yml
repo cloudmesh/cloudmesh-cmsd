@@ -20,6 +20,8 @@ services:
 install:
   - sudo apt-get install build-essential libssl-dev libffi-dev
   - python --version
+  - python -m venv ~/EN3
+  - source ~/ENV3/bin/activate
   - pip install pip -U
   - pip --version
   - which python
