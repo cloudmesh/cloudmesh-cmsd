@@ -24,7 +24,8 @@ install:
   - pip --version
   - which python
   - which pip
-  - pip install cryptography --no-binary cryptography
+#  - pip install cryptography --no-binary cryptography
+  - pip install cryptography==2.5
   - pip install -r requirements.txt
   - pip install .
   - pwd
