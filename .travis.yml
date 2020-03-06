@@ -38,7 +38,7 @@ install:
 script:
   - cms help
   - cms config set cloudmesh.profile.user="test"
-  - cms config set cloudmesh.data.mongo.PASSWORD=`openssl rand -base64 32`
+  - cms config set cloudmesh.data.mongo.PASSWORD="nopassword"
   - cmsd --setup
   - cmsd help
   - pytest -v --capture=no tests
