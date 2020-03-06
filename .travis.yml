@@ -26,8 +26,8 @@ install:
   - pip --version
   - which python
   - which pip
-#  - pip install cryptography --no-binary cryptography
-  - sudo pip install cryptography==2.5
+  - sudo pip install cryptography --no-binary cryptography
+#  - sudo pip install cryptography==2.5
   - sudo pip install -r requirements.txt
   - sudo pip install .
   - pwd
