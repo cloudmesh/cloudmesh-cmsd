@@ -17,7 +17,7 @@ language: python
 services:
   - docker
 
-install:
+before_install:
   - sudo apt-get install build-essential libssl-dev libffi-dev
   - sudo apt-get install python3-tk
   - python --version
@@ -27,13 +27,16 @@ install:
   - pip --version
   - which python
   - which pip
+  - pwd
+
+install:
   - sudo pip install cryptography --no-binary cryptography
   - sudo pip install -r requirements.txt
   - sudo pip install -r requirements-dev.txt
   - sudo pip install .
-  - pwd
-  - cmsd --setup
-  - cmsd help
 
 script:
+  - cms config set cloudmesh.profile.user="test"
+  - cmsd --setup
+  - cmsd help
   - pytest -v --capture=no tests
