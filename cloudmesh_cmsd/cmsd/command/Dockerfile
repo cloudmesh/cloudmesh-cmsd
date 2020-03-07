@@ -15,7 +15,7 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key 
 RUN echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 
 RUN apt-get -y update
-RUN apt-get install -y mongodb-org-shell
+RUN apt-get install -y mongodb-org
 
 #
 # the display setting does not work
