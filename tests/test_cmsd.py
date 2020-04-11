@@ -24,7 +24,7 @@ class TestCmsd:
         print()
 
         Benchmark.Start()
-        result = Shell.execute("cmsd --setup", shell=True)
+        result = Shell.run("cmsd --setup", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -36,7 +36,7 @@ class TestCmsd:
 
         version = readfile("VERSION")
         Benchmark.Start()
-        result = Shell.execute("cmsd --version", shell=True)
+        result = Shell.run("cmsd --version", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -49,7 +49,7 @@ class TestCmsd:
         HEADING()
 
         Benchmark.Start()
-        result = Shell.execute("cmsd --update", shell=True)
+        result = Shell.run("cmsd --update", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -60,7 +60,7 @@ class TestCmsd:
     def test_banner_hello(self):
         HEADING()
         Benchmark.Start()
-        result = Shell.execute("cmsd banner hello", shell=True)
+        result = Shell.run("cmsd banner hello", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
@@ -92,7 +92,7 @@ class TestCmsd:
     def exclude_test_clean(self):
         HEADING()
         Benchmark.Start()
-        result = Shell.execute("cmsd --clean", shell=True)
+        result = Shell.run("cmsd --clean", shell=True)
         Benchmark.Stop()
         VERBOSE(result)
 
