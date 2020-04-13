@@ -89,6 +89,15 @@ class CmsdCommand:
         print(f"\nUpdating cloudmesh repos in {CMS_CONTAINER_NAME}")
         _docker_exec("/bin/bash /init.sh")
 
+    def install(self, bundle):
+        """
+        Updates container docker repos
+        :return:
+        """
+        print(f"\nInstalling cloudmesh repos in {CMS_CONTAINER_NAME}")
+        _docker_exec("pip install cloudmesh-installer -U")
+        _docker_exec(f"cloudmesh-installer get {bundle}")
+
     @staticmethod
     def run(command=""):
         """
@@ -331,6 +340,7 @@ class CmsdCommand:
             cmsd --setup [--mongo]
             cmsd --clean [--force]
             cmsd --version
+            cmsd --install BUNDLE
             cmsd --update
             cmsd --start
             cmsd --stop
@@ -374,6 +384,11 @@ class CmsdCommand:
             cmsd --update
 
                 updates the cloudmesh repositories inside the cms-container
+
+            cmsd --install BUNDLE
+
+                installs the cloudmesh bundle.
+                It is the same command as cmsd cloudmesh-installer get BUNDLE
 
             cmsd --start
 
@@ -467,6 +482,9 @@ class CmsdCommand:
 
         elif arguments["--update"]:
             self.update()
+
+        elif arguments["--install"]:
+            self.install(arguments.BUNDLE)
 
         elif arguments["--shell"]:
             self.shell()
