@@ -2,8 +2,6 @@
 # This command is python2 and 3 compatible
 #
 
-from __future__ import print_function
-
 import os
 import shutil
 import subprocess
